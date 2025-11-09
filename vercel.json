@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd backend && pip install -r requirements.txt",
+  "outputDirectory": "backend",
+  "installCommand": "pip install -r backend/requirements.txt",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/api/$1"
+    }
+  ]
+}
