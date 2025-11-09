@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PFM - Personal Finance Manager</string>
+    <string name="title_activity_main">PFM - Personal Finance Manager</string>
+    <string name="package_name">com.pfm.mobile</string>
+    <string name="custom_url_scheme">com.pfm.mobile</string>
+</resources>
