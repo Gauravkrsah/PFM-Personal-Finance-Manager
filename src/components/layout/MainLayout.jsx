@@ -2,6 +2,8 @@ import React from 'react'
 import Header from '../Header'
 import Sidebar from './Sidebar'
 import MobileNav from './MobileNav'
+import ThemeToggle from '../ThemeToggle'
+
 
 export default function MainLayout({ children, activeTab, setActiveTab, user, onLogout, currentGroup }) {
     return (
@@ -18,12 +20,15 @@ export default function MainLayout({ children, activeTab, setActiveTab, user, on
             {/* Main Content */}
             <main className="lg:ml-64 h-screen flex flex-col">
                 {/* Mobile Header */}
-                <div className="lg:hidden flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-paper-200 px-4 py-3 z-20 sticky top-0">
+                <div className="lg:hidden flex-shrink-0 bg-white/80 dark:bg-paper-100/80 backdrop-blur-xl border-b border-paper-200 dark:border-paper-300/50 px-4 py-3 z-20 sticky top-0">
                     <div className="flex items-center justify-between">
                         <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                            <div className="w-8 h-8 bg-black text-white flex items-center justify-center text-xs font-bold rounded-2xl shadow-lg shadow-black/20">PFM</div>
+                            <div className="w-8 h-8 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-xs font-bold rounded-2xl shadow-lg shadow-black/20">PFM</div>
                         </button>
-                        <Header user={user} onLogout={onLogout} onProfileUpdate={() => { }} currentGroup={currentGroup} compact />
+                        <div className="flex items-center gap-2">
+                            <ThemeToggle />
+                            <Header user={user} onLogout={onLogout} onProfileUpdate={() => { }} currentGroup={currentGroup} compact />
+                        </div>
                     </div>
                 </div>
 

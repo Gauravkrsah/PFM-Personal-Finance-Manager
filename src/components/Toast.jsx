@@ -18,10 +18,10 @@ export const ToastProvider = ({ children }) => {
     // Prevent duplicate toasts
     const exists = toasts.some(toast => toast.message === message && toast.type === type)
     if (exists) return
-    
+
     const id = Date.now() + Math.random()
     setToasts(prev => [...prev, { id, message, type, duration }])
-    
+
     if (duration > 0) {
       setTimeout(() => removeToast(id), duration)
     }
@@ -34,14 +34,14 @@ export const ToastProvider = ({ children }) => {
   const showConfirm = (message, onConfirm, onCancel) => {
     // Prevent multiple confirm dialogs with same message
     if (activeConfirms.has(message)) return
-    
+
     setActiveConfirms(prev => new Set([...prev, message]))
     const id = Date.now() + Math.random()
-    
-    setToasts(prev => [...prev, { 
-      id, 
-      message, 
-      type: 'confirm', 
+
+    setToasts(prev => [...prev, {
+      id,
+      message,
+      type: 'confirm',
       onConfirm: () => {
         removeToast(id)
         setActiveConfirms(prev => {
@@ -93,7 +93,7 @@ const ToastContainer = ({ toasts, removeToast }) => {
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-start pt-20 min-h-screen space-y-4"
       onClick={handleBackdropClick}
     >
@@ -117,27 +117,27 @@ const ToastItem = ({ toast, onRemove }) => {
   }
 
   const getToastStyles = () => {
-    const base = "transform transition-all duration-300 ease-in-out w-full max-w-md mx-4 bg-white shadow-2xl rounded-xl pointer-events-auto border"
-    
+    const base = "transform transition-all duration-300 ease-in-out w-full max-w-md mx-4 bg-white dark:bg-paper-200 shadow-2xl rounded-xl pointer-events-auto border dark:border-paper-300"
+
     if (!isVisible) {
       return `${base} scale-95 opacity-0 -translate-y-2`
     }
-    
+
     return `${base} scale-100 opacity-100 translate-y-0`
   }
 
   const getIconAndColor = () => {
     switch (toast.type) {
       case 'success':
-        return { icon: '✅', bg: 'bg-green-100', border: 'border-green-200' }
+        return { icon: '✅', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-200 dark:border-green-800/50' }
       case 'error':
-        return { icon: '❌', bg: 'bg-red-100', border: 'border-red-200' }
+        return { icon: '❌', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-200 dark:border-red-800/50' }
       case 'warning':
-        return { icon: '⚠️', bg: 'bg-yellow-100', border: 'border-yellow-200' }
+        return { icon: '⚠️', bg: 'bg-yellow-100 dark:bg-amber-900/30', border: 'border-yellow-200 dark:border-amber-800/50' }
       case 'confirm':
-        return { icon: '❓', bg: 'bg-blue-100', border: 'border-blue-200' }
+        return { icon: '❓', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' }
       default:
-        return { icon: 'ℹ️', bg: 'bg-blue-100', border: 'border-blue-200' }
+        return { icon: 'ℹ️', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' }
     }
   }
 
@@ -151,18 +151,18 @@ const ToastItem = ({ toast, onRemove }) => {
             <div className={`inline-flex items-center justify-center w-16 h-16 ${bg} rounded-full mb-4`}>
               <span className="text-3xl">{icon}</span>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Action</h3>
-            <p className="text-gray-600 mb-6">{toast.message}</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Confirm Action</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{toast.message}</p>
             <div className="flex space-x-3 justify-center">
               <button
                 onClick={toast.onConfirm}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-lg shadow-red-500/20"
               >
                 Confirm
               </button>
               <button
                 onClick={toast.onCancel}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                className="px-6 py-2 bg-gray-200 dark:bg-paper-300 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-paper-400 transition-colors font-medium border border-transparent dark:border-paper-400"
               >
                 Cancel
               </button>
@@ -181,11 +181,11 @@ const ToastItem = ({ toast, onRemove }) => {
             <span className="text-2xl">{icon}</span>
           </div>
           <div className="flex-1">
-            <p className="text-base font-medium text-gray-900">{toast.message}</p>
+            <p className="text-base font-medium text-gray-900 dark:text-gray-100">{toast.message}</p>
           </div>
           <button
             onClick={handleRemove}
-            className="ml-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            className="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-paper-300"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -1,45 +1,46 @@
 module.exports = {
+  darkMode: 'class',
   content: ["./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
         paper: {
-          50: '#fffbf7',
-          100: '#fff7ed',  // Base background
-          200: '#ffedd5',
-          300: '#fed7aa',
-          400: '#fdba74',
-          500: '#fb923c',
-          600: '#f97316',
-          700: '#ea580c',
-          800: '#c2410c',
-          900: '#9a3412',
+          50: 'rgba(var(--color-paper-50) / <alpha-value>)',
+          100: 'rgba(var(--color-paper-100) / <alpha-value>)',  // Base background
+          200: 'rgba(var(--color-paper-200) / <alpha-value>)',
+          300: 'rgba(var(--color-paper-300) / <alpha-value>)',
+          400: 'rgba(var(--color-paper-400) / <alpha-value>)',
+          500: 'rgba(var(--color-paper-500) / <alpha-value>)',
+          600: 'rgba(var(--color-paper-600) / <alpha-value>)',
+          700: 'rgba(var(--color-paper-700) / <alpha-value>)',
+          800: 'rgba(var(--color-paper-800) / <alpha-value>)',
+          900: 'rgba(var(--color-paper-900) / <alpha-value>)',
         },
         ink: {
-          50: '#f6f6f6',
-          100: '#e7e7e7',
-          200: '#d1d1d1',
-          300: '#b0b0b0',
-          400: '#888888',
-          500: '#6d6d6d',
-          600: '#5d5d5d',
-          700: '#4f4f4f',
-          800: '#454545',
-          900: '#3d3d3d', // Soft black for text
-          950: '#1a1a1a', // Darker black for headings
+          50: 'rgba(var(--color-ink-50) / <alpha-value>)',
+          100: 'rgba(var(--color-ink-100) / <alpha-value>)',
+          200: 'rgba(var(--color-ink-200) / <alpha-value>)',
+          300: 'rgba(var(--color-ink-300) / <alpha-value>)',
+          400: 'rgba(var(--color-ink-400) / <alpha-value>)',
+          500: 'rgba(var(--color-ink-500) / <alpha-value>)',
+          600: 'rgba(var(--color-ink-600) / <alpha-value>)',
+          700: 'rgba(var(--color-ink-700) / <alpha-value>)',
+          800: 'rgba(var(--color-ink-800) / <alpha-value>)',
+          900: 'rgba(var(--color-ink-900) / <alpha-value>)', // Soft black for text
+          950: 'rgba(var(--color-ink-950) / <alpha-value>)', // Darker black for headings
         },
         // Keep existing grays but map them to softer tones if needed, or just keep as is for compatibility
         gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
+          50: 'rgba(var(--color-gray-50) / <alpha-value>)',
+          100: 'rgba(var(--color-gray-100) / <alpha-value>)',
+          200: 'rgba(var(--color-gray-200) / <alpha-value>)',
+          300: 'rgba(var(--color-gray-300) / <alpha-value>)',
+          400: 'rgba(var(--color-gray-400) / <alpha-value>)',
+          500: 'rgba(var(--color-gray-500) / <alpha-value>)',
+          600: 'rgba(var(--color-gray-600) / <alpha-value>)',
+          700: 'rgba(var(--color-gray-700) / <alpha-value>)',
+          800: 'rgba(var(--color-gray-800) / <alpha-value>)',
+          900: 'rgba(var(--color-gray-900) / <alpha-value>)',
         },
         blue: {
           50: '#eff6ff',

@@ -57,6 +57,32 @@ class ExpenseParser:
         
         # ============== LOAN PATTERNS FIRST (before generic patterns) ==============
         
+        # Pattern 1: "Person lent [me] amount" - Explicit Loan
+        person_lent_pattern = r'^([a-zA-Z]+)\s+(?:lent)(?:\s+me)?\s+(\d+)$'
+        person_lent_match = re.match(person_lent_pattern, text, re.IGNORECASE)
+        if person_lent_match:
+            person, amount = person_lent_match.groups()
+            return {
+                'amount': -int(amount), # Negative = money coming in (I received)
+                'item': 'loan from',
+                'category': 'Loan',
+                'remarks': f"Loan from {person.title()}",
+                'paid_by': person.title()
+            }
+
+        # Pattern 2: "Person gave/sent/send [me] amount" - Ambiguous
+        person_gave_pattern = r'^([a-zA-Z]+)\s+(?:gave|sent|send)(?:\s+me)?\s+(\d+)$'
+        person_gave_match = re.match(person_gave_pattern, text, re.IGNORECASE)
+        if person_gave_match:
+            person, amount = person_gave_match.groups()
+            return {
+                'amount': -int(amount), # Negative = money coming in
+                'item': 'received from',
+                'category': 'Other', # Ambiguous - let user decide
+                'remarks': f"Received from {person.title()}",
+                'paid_by': person.title()
+            }
+
         # Pattern: "i gave/lent person amount" like "i gave sonu 500" - needs confirmation (LENT or PAID?)
         i_gave_pattern = r'^i\s+(?:gave|lent|sent)\s+([a-zA-Z]+)\s+(\d+)$'
         i_gave_match = re.match(i_gave_pattern, text, re.IGNORECASE)
@@ -83,18 +109,7 @@ class ExpenseParser:
                 'paid_by': person.title()
             }
         
-        # Pattern: "person gave/lent amount" like "hari gave 400" (you received from them)
-        person_gave_pattern = r'^([a-zA-Z]+)\s+(?:gave|lent|sent)\s+(\d+)$'
-        person_gave_match = re.match(person_gave_pattern, text, re.IGNORECASE)
-        if person_gave_match:
-            person, amount = person_gave_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in (you received)
-                'item': 'received from',
-                'category': 'Loan',
-                'remarks': f"Received from {person.title()}",
-                'paid_by': person.title()
-            }
+
         
         # Pattern: "person borrowed amount" like "hari borrowed 400" (you lent to them)
         person_borrowed_pattern = r'^([a-zA-Z]+)\s+(?:borrowed|took)\s+(\d+)$'
@@ -668,9 +683,13 @@ class ExpenseParser:
         }
         
         item_lower = item.lower()
+        item_lower = item.lower()
         for nepali, english in nepali_mappings.items():
-            if nepali in item_lower:
-                item = item_lower.replace(nepali, english)
+            # Use word boundaries to avoid partial matches (e.g. "anda" in "chandan")
+            if re.search(r'\b' + re.escape(nepali) + r'\b', item_lower):
+                item_lower = re.sub(r'\b' + re.escape(nepali) + r'\b', english, item_lower)
+                # Update item to reflect changes but maintain case if possible (difficult here so we use lower)
+                item = item_lower
                 break
         
         return item

@@ -13,7 +13,7 @@ export default function MobileNav({ activeTab, setActiveTab }) {
         <nav className="bottom-nav safe-bottom">
             <div className="flex h-14">
                 {mobileNavItems.map(item => (
-                    <button key={item.id} onClick={() => setActiveTab(item.id)} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors ${activeTab === item.id ? 'text-black' : 'text-gray-400'}`}>
+                    <button key={item.id} onClick={() => setActiveTab(item.id)} className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors ${activeTab === item.id ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={activeTab === item.id ? 2 : 1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                         </svg>

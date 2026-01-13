@@ -202,7 +202,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
             {!loading && data.length === 0 && (
               <tr>
                 <td colSpan="7" className="p-8 text-center text-gray-500">
-                  <div className="text-3xl mb-2">📊</div>
+                  <div className="text-3xl mb-2"></div>
                   <div className="text-lg font-medium mb-1">No expenses found</div>
                   <div className="text-sm text-gray-400">Add some using the chat input!</div>
                 </td>
@@ -401,7 +401,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
             {!loading && data.length === 0 && (
               <tr>
                 <td colSpan="7" className="p-4 text-center text-gray-500">
-                  <div className="text-lg mb-1">📊</div>
+                  <div className="text-lg mb-1"></div>
                   <div className="text-sm">No expenses found.</div>
                   <div className="text-xs text-gray-400">Add some using the chat input!</div>
                 </td>
@@ -478,7 +478,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                     </td>
                     <td className="p-2">
                       <span className={`text-xs font-bold ${expense.amount === 0 ? 'text-red-500' :
-                          expense.amount < 0 ? 'text-green-600' : 'text-red-600'
+                        expense.amount < 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
                         {expense.amount === 0 ? 'Need amount' : `Rs.${Math.abs(expense.amount)}`}
                       </span>

@@ -148,15 +148,15 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
   const netLoan = loanGiven - loanReceived
 
   return (
-    <div className="card p-4">
+    <div className="card p-4 bg-white dark:bg-paper-100 border-paper-200 dark:border-paper-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h2 className="font-semibold text-xl tracking-tight"> Loan Management</h2>
-          <p className="text-gray-500 text-xs mt-0.5 sm:block hidden">Income and Expenses</p>
+          <h2 className="font-semibold text-xl tracking-tight text-ink-900"> Loan Management</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5 sm:block hidden">Income and Expenses</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <DateRangePicker value={dateRange} onChange={setDateRange} className="flex-1 sm:w-48" />
-          <button onClick={fetchLoans} disabled={loading} className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700">
+          <button onClick={fetchLoans} disabled={loading} className="px-3 py-2 text-xs bg-gray-100 dark:bg-paper-200 hover:bg-gray-200 dark:hover:bg-paper-300 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
             {loading ? '...' : 'Refresh'}
           </button>
         </div>
@@ -164,35 +164,47 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
 
       {/* Summary Cards - Horizontal scroll on mobile */}
       <div className="flex md:grid md:grid-cols-3 gap-3 mb-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-        <div className="bg-green-50 p-3 md:p-4 rounded-xl border border-green-100 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+        <div className="bg-green-50 dark:bg-green-900/20 p-3 md:p-4 rounded-xl border border-green-100 dark:border-green-900/30 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
           <div className="relative z-10">
-            <div className="text-[10px] md:text-xs font-semibold text-green-800 uppercase tracking-wide mb-1">Total Lent</div>
-            <div className="text-lg md:text-2xl font-bold text-green-900">Rs.{loanGiven.toLocaleString()}</div>
-            <div className="text-[10px] md:text-xs text-green-700 mt-1">To others ({data.filter(l => l.amount > 0).length} txns)</div>
+            <div className="text-[10px] md:text-xs font-semibold text-green-800 dark:text-green-300 uppercase tracking-wide mb-1">Total Lent</div>
+            <div className="text-lg md:text-2xl font-bold text-green-900 dark:text-green-200">Rs.{loanGiven.toLocaleString()}</div>
+            <div className="text-[10px] md:text-xs text-green-700 dark:text-green-400 mt-1">To others ({data.filter(l => l.amount > 0).length} txns)</div>
           </div>
-          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
+          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4 text-green-900 dark:text-green-500">
             <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.91 2.53 1.91 1.29 0 2.13-.73 2.13-1.65 0-1.22-1.28-1.57-3.04-1.93-2.26-.47-4.14-1.29-4.14-3.56 0-1.84 1.37-2.92 3.82-3.32V4h2.67v1.89c1.4.31 2.54 1.25 2.76 3.01h-2c-.17-.9-1.07-1.54-1.99-1.54-1.12 0-1.77.67-1.77 1.48 0 1.13 1.27 1.47 2.89 1.83 2.45.54 4.29 1.35 4.29 3.65 0 1.96-1.56 3.12-3.57 3.48z" /></svg>
           </div>
         </div>
 
-        <div className="bg-orange-50 p-3 md:p-4 rounded-xl border border-orange-100 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+        <div className="bg-orange-50 dark:bg-orange-900/20 p-3 md:p-4 rounded-xl border border-orange-100 dark:border-orange-900/30 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
           <div className="relative z-10">
-            <div className="text-[10px] md:text-xs font-semibold text-orange-800 uppercase tracking-wide mb-1">Borrowed</div>
-            <div className="text-lg md:text-2xl font-bold text-orange-900">Rs.{loanReceived.toLocaleString()}</div>
-            <div className="text-[10px] md:text-xs text-orange-700 mt-1">From others ({data.filter(l => l.amount < 0).length} txns)</div>
+            <div className="text-[10px] md:text-xs font-semibold text-orange-800 dark:text-orange-300 uppercase tracking-wide mb-1">Borrowed</div>
+            <div className="text-lg md:text-2xl font-bold text-orange-900 dark:text-orange-200">Rs.{loanReceived.toLocaleString()}</div>
+            <div className="text-[10px] md:text-xs text-orange-700 dark:text-orange-400 mt-1">From others ({data.filter(l => l.amount < 0).length} txns)</div>
           </div>
-          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
+          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4 text-orange-900 dark:text-orange-500">
             <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.91 2.53 1.91 1.29 0 2.13-.73 2.13-1.65 0-1.22-1.28-1.57-3.04-1.93-2.26-.47-4.14-1.29-4.14-3.56 0-1.84 1.37-2.92 3.82-3.32V4h2.67v1.89c1.4.31 2.54 1.25 2.76 3.01h-2c-.17-.9-1.07-1.54-1.99-1.54-1.12 0-1.77.67-1.77 1.48 0 1.13 1.27 1.47 2.89 1.83 2.45.54 4.29 1.35 4.29 3.65 0 1.96-1.56 3.12-3.57 3.48z" /></svg>
           </div>
         </div>
 
-        <div className={`p-3 md:p-4 rounded-xl border shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink ${netLoan >= 0 ? 'bg-gradient-to-br from-green-50 to-emerald-100 border-green-200' : 'bg-gradient-to-br from-red-50 to-orange-100 border-red-200'}`}>
+        <div className={`p-3 md:p-4 rounded-xl border shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink ${netLoan >= 0
+            ? 'bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 dark:from-green-900/20 dark:to-emerald-900/30 dark:border-green-800/50'
+            : 'bg-gradient-to-br from-red-50 to-orange-100 border-red-200 dark:from-red-900/20 dark:to-orange-900/30 dark:border-red-800/50'
+          }`}>
           <div className="relative z-10">
-            <div className={`text-[10px] md:text-xs font-semibold uppercase tracking-wide mb-1 ${netLoan >= 0 ? 'text-green-800' : 'text-red-800'}`}>Net Position</div>
-            <div className={`text-lg md:text-2xl font-bold ${netLoan >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+            <div className={`text-[10px] md:text-xs font-semibold uppercase tracking-wide mb-1 ${netLoan >= 0
+                ? 'text-green-800 dark:text-green-300'
+                : 'text-red-800 dark:text-red-300'
+              }`}>Net Position</div>
+            <div className={`text-lg md:text-2xl font-bold ${netLoan >= 0
+                ? 'text-green-900 dark:text-green-100'
+                : 'text-red-900 dark:text-red-100'
+              }`}>
               Rs.{Math.abs(netLoan).toLocaleString()}
             </div>
-            <div className={`text-[10px] md:text-xs font-medium mt-1 ${netLoan >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+            <div className={`text-[10px] md:text-xs font-medium mt-1 ${netLoan >= 0
+                ? 'text-green-700 dark:text-green-400'
+                : 'text-red-700 dark:text-red-400'
+              }`}>
               {netLoan >= 0 ? '✨ Others owe you' : '⚠️ You owe'}
             </div>
           </div>
@@ -209,7 +221,7 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
             placeholder="Search loans..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-sm bg-paper-50 border-none rounded-2xl focus:ring-2 focus:ring-black/5 outline-none transition-all placeholder:text-gray-400"
+            className="w-full pl-10 pr-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border-none rounded-2xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 text-ink-900"
           />
           <svg className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -218,7 +230,7 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="px-4 py-2.5 text-sm bg-paper-50 border-none rounded-2xl focus:ring-2 focus:ring-black/5 outline-none font-medium text-gray-700 sm:w-40"
+          className="px-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border-none rounded-2xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none font-medium text-gray-700 dark:text-gray-200 sm:w-40"
         >
           <option value="all">All Loans</option>
           <option value="given">Loans Given</option>
@@ -226,20 +238,20 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-paper-100">
+      <div className="overflow-x-auto rounded-2xl border border-paper-100 dark:border-paper-300/50">
         <table className="w-full text-sm text-left min-w-[700px]">
           <thead>
-            <tr className="bg-paper-50/50 border-b border-paper-100">
-              <th className="p-4 font-semibold text-gray-900 text-xs uppercase tracking-wider">Date</th>
-              <th className="p-4 font-semibold text-gray-900 text-xs uppercase tracking-wider">Type</th>
-              <th className="p-4 font-semibold text-gray-900 text-xs uppercase tracking-wider">Amount</th>
-              <th className="p-4 font-semibold text-gray-900 text-xs uppercase tracking-wider">Person</th>
-              <th className="p-4 font-semibold text-gray-900 text-xs uppercase tracking-wider">Remarks</th>
-              <th className="p-4 font-semibold text-gray-900 text-xs uppercase tracking-wider">Added by</th>
-              <th className="p-4 font-semibold text-gray-900 text-xs uppercase tracking-wider text-right">Actions</th>
+            <tr className="bg-paper-50/50 dark:bg-paper-200/50 border-b border-paper-100 dark:border-paper-300/50">
+              <th className="p-4 font-semibold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-wider">Date</th>
+              <th className="p-4 font-semibold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-wider">Type</th>
+              <th className="p-4 font-semibold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-wider">Amount</th>
+              <th className="p-4 font-semibold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-wider">Person</th>
+              <th className="p-4 font-semibold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-wider">Remarks</th>
+              <th className="p-4 font-semibold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-wider">Added by</th>
+              <th className="p-4 font-semibold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-paper-100">
+          <tbody className="divide-y divide-paper-100 dark:divide-paper-300/30">
             {loading && (
               <tr>
                 <td colSpan="7" className="p-8 text-center text-gray-500">Loading loans...</td>
@@ -261,8 +273,8 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
               </tr>
             )}
             {!loading && filteredData.map((loan) => (
-              <tr key={loan.id} className="hover:bg-paper-50/50 transition-colors">
-                <td className="p-4 text-gray-600 text-sm whitespace-nowrap">{new Date(loan.date).toLocaleDateString()}</td>
+              <tr key={loan.id} className="hover:bg-paper-50/50 dark:hover:bg-paper-300/20 transition-colors">
+                <td className="p-4 text-gray-600 dark:text-gray-300 text-sm whitespace-nowrap">{new Date(loan.date).toLocaleDateString()}</td>
                 <td className="p-4">
                   {(() => {
                     const item = (loan.item || '').toLowerCase()
@@ -280,23 +292,23 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
                       bgClass = 'bg-blue-100 text-blue-700 border border-blue-200'
                     } else if (item.includes('paid')) {
                       type = 'PAID'
-                      bgClass = 'bg-purple-100 text-purple-700 border border-purple-200'
+                      bgClass = 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/30'
                     } else if (loan.amount > 0) {
                       type = 'LENT'
-                      bgClass = 'bg-green-100 text-green-700 border border-green-200'
+                      bgClass = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800/30'
                     } else {
                       type = 'BORROWED'
-                      bgClass = 'bg-orange-100 text-orange-700 border border-orange-200'
+                      bgClass = 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/30'
                     }
 
                     return <span className={`px-3 py-1 text-xs font-medium rounded-full ${bgClass}`}>{type}</span>
                   })()}
                 </td>
-                <td className={`p-4 font-bold text-sm ${loan.amount > 0 ? 'text-green-700' : 'text-orange-700'}`}>
+                <td className={`p-4 font-bold text-sm ${loan.amount > 0 ? 'text-green-700 dark:text-green-400' : 'text-orange-700 dark:text-orange-400'}`}>
                   Rs.{Math.abs(loan.amount || 0).toLocaleString()}
                 </td>
-                <td className="p-4 font-medium text-gray-900 text-sm">{loan.paid_by || '-'}</td>
-                <td className="p-4 text-gray-700 text-sm max-w-[200px] truncate" title={loan.remarks}>{loan.remarks || '-'}</td>
+                <td className="p-4 font-medium text-gray-900 dark:text-gray-100 text-sm">{loan.paid_by || '-'}</td>
+                <td className="p-4 text-gray-700 dark:text-gray-300 text-sm max-w-[200px] truncate" title={loan.remarks}>{loan.remarks || '-'}</td>
                 <td className="p-4 text-gray-500 text-xs">
                   {(() => {
                     const userId = loan.user_id
@@ -317,9 +329,9 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-paper-50 border-t border-paper-100 font-medium">
-              <td className="p-4 text-gray-900" colSpan="2">Total Lent</td>
-              <td className="p-4 text-green-700 font-bold">Rs.{loanGiven.toLocaleString()}</td>
+            <tr className="bg-paper-50 dark:bg-paper-200/50 border-t border-paper-100 dark:border-paper-300/50 font-medium">
+              <td className="p-4 text-gray-900 dark:text-gray-100" colSpan="2">Total Lent</td>
+              <td className="p-4 text-green-700 dark:text-green-400 font-bold">Rs.{loanGiven.toLocaleString()}</td>
               <td className="p-4" colSpan="4"></td>
             </tr>
           </tfoot>
@@ -329,10 +341,10 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowEditModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-paper-100 rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold">Edit Loan</h3>
-              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-lg font-bold text-ink-900">Edit Loan</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -341,42 +353,42 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
                 <input
                   type="date"
                   value={editForm.date || ''}
                   onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                  className="w-full px-4 py-2.5 text-sm bg-paper-50 border border-paper-200 rounded-xl focus:ring-2 focus:ring-black/5 outline-none"
+                  className="w-full px-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border border-paper-200 dark:border-paper-300 rounded-xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none text-ink-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Amount (Rs.)</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Amount (Rs.)</label>
                 <input
                   type="number"
                   value={Math.abs(editForm.amount || 0)}
                   onChange={(e) => setEditForm({ ...editForm, amount: editForm.amount > 0 ? Math.abs(e.target.value) : -Math.abs(e.target.value) })}
-                  className="w-full px-4 py-2.5 text-sm bg-paper-50 border border-paper-200 rounded-xl focus:ring-2 focus:ring-black/5 outline-none"
+                  className="w-full px-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border border-paper-200 dark:border-paper-300 rounded-xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none text-ink-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Person</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Person</label>
                 <input
                   type="text"
                   value={editForm.paid_by || ''}
                   onChange={(e) => setEditForm({ ...editForm, paid_by: e.target.value })}
-                  className="w-full px-4 py-2.5 text-sm bg-paper-50 border border-paper-200 rounded-xl focus:ring-2 focus:ring-black/5 outline-none"
+                  className="w-full px-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border border-paper-200 dark:border-paper-300 rounded-xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none text-ink-900"
                   placeholder="Person name"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Remarks</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Remarks</label>
                 <textarea
                   value={editForm.remarks || ''}
                   onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })}
-                  className="w-full px-4 py-2.5 text-sm bg-paper-50 border border-paper-200 rounded-xl focus:ring-2 focus:ring-black/5 outline-none resize-none"
+                  className="w-full px-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border border-paper-200 dark:border-paper-300 rounded-xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none resize-none text-ink-900"
                   rows={3}
                   placeholder="Add notes..."
                 />
@@ -386,13 +398,13 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setShowEditModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-paper-100 rounded-xl hover:bg-paper-200 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-paper-100 dark:bg-paper-300 rounded-xl hover:bg-paper-200 dark:hover:bg-paper-400 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-black rounded-xl hover:bg-gray-800 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-black dark:bg-white dark:text-black rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
               >
                 Save Changes
               </button>

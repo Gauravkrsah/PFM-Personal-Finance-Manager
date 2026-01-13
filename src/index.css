@@ -3,6 +3,100 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Paper - Warm whites/oranges for light mode */
+    --color-paper-50: 255 251 247;
+    /* #fffbf7 */
+    --color-paper-100: 255 247 237;
+    /* #fff7ed */
+    --color-paper-200: 255 237 213;
+    /* #ffedd5 */
+    --color-paper-300: 254 215 170;
+    /* #fed7aa */
+    --color-paper-400: 253 186 116;
+    /* #fdba74 */
+    --color-paper-500: 251 146 60;
+    /* #fb923c */
+    --color-paper-600: 249 115 22;
+    /* #f97316 */
+    --color-paper-700: 234 88 12;
+    /* #ea580c */
+    --color-paper-800: 194 65 12;
+    /* #c2410c */
+    --color-paper-900: 154 52 18;
+    /* #9a3412 */
+
+    /* Ink - Grays for light mode */
+    --color-ink-50: 246 246 246;
+    /* #f6f6f6 */
+    --color-ink-100: 231 231 231;
+    /* #e7e7e7 */
+    --color-ink-200: 209 209 209;
+    /* #d1d1d1 */
+    --color-ink-300: 176 176 176;
+    /* #b0b0b0 */
+    --color-ink-400: 136 136 136;
+    /* #888888 */
+    --color-ink-500: 109 109 109;
+    /* #6d6d6d */
+    --color-ink-600: 93 93 93;
+    /* #5d5d5d */
+    --color-ink-700: 79 79 79;
+    /* #4f4f4f */
+    --color-ink-800: 69 69 69;
+    /* #454545 */
+    --color-ink-900: 61 61 61;
+    /* #3d3d3d */
+    --color-ink-950: 26 26 26;
+    /* #1a1a1a */
+
+    /* Generic Gray - keeping same as default tailwind for now in light mode */
+    --color-gray-50: 249 250 251;
+    --color-gray-100: 243 244 246;
+    --color-gray-200: 229 231 235;
+    --color-gray-300: 209 213 219;
+    --color-gray-400: 156 163 175;
+    --color-gray-500: 107 114 128;
+    --color-gray-600: 75 85 99;
+    --color-gray-700: 55 65 81;
+    --color-gray-800: 31 41 55;
+    --color-gray-900: 17 24 39;
+  }
+
+  .dark {
+    /* Paper - Dark mode backgrounds (Inverse & Shifted to cool grays/blacks) */
+    --color-paper-50: 10 10 12;
+    /* Richer black background */
+    --color-paper-100: 20 20 23;
+    /* Surface color */
+    --color-paper-200: 30 30 35;
+    /* Elevated surface */
+    --color-paper-300: 45 45 50;
+    /* Border / Divider */
+    --color-paper-400: 80 80 85;
+    /* Muted text */
+    --color-paper-500: 161 161 170;
+    --color-paper-600: 212 212 216;
+    --color-paper-700: 228 228 231;
+    --color-paper-800: 244 244 245;
+    --color-paper-900: 250 250 250;
+
+    /* Ink - Text for dark mode (Inverted to whites/grays) */
+    --color-ink-50: 10 10 12;
+    --color-ink-100: 24 24 27;
+    --color-ink-200: 39 39 42;
+    --color-ink-300: 82 82 91;
+    --color-ink-400: 113 113 122;
+    --color-ink-500: 161 161 170;
+    --color-ink-600: 212 212 216;
+    --color-ink-700: 228 228 231;
+    --color-ink-800: 244 244 245;
+    /* High contrast text */
+    --color-ink-900: 250 250 250;
+    /* Pure white text */
+    --color-ink-950: 255 255 255;
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
@@ -13,12 +107,9 @@
     font-family: 'Roboto', 'Outfit', 'Plus Jakarta Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: #fffbf7;
-    /* paper-50 (New lighter base) */
-    color: #111827;
-    /* Darker black (Gray 900) for better contrast */
+    /* Use variables now */
+    @apply bg-paper-50 text-ink-900 transition-colors duration-300;
     font-weight: 500;
-    /* Increased weight for readability */
     min-height: 100vh;
   }
 
@@ -29,9 +120,8 @@
   h5,
   h6 {
     font-family: 'Outfit', sans-serif;
+    @apply text-ink-950;
     letter-spacing: -0.02em;
-    color: #0d0d0d;
-    /* Almost black */
     font-weight: 600;
   }
 }
@@ -51,10 +141,12 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: #d1d5db;
     border-radius: 100vh;
+    @apply dark:bg-gray-600;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
+    @apply dark:bg-gray-500;
   }
 
   /* Hide scrollbar but keep scroll functionality */
@@ -71,31 +163,72 @@
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-card border border-paper-200/60 backdrop-blur-sm transition-all duration-300;
+    @apply bg-white dark:bg-paper-100 rounded-2xl shadow-card dark:shadow-none border border-paper-200/60 dark:border-paper-300/50 backdrop-blur-sm transition-all duration-300;
   }
 
   .card:hover {
-    @apply shadow-card-hover;
+    @apply shadow-card-hover dark:shadow-lg dark:shadow-black/20;
   }
 
   .btn-primary {
-    @apply px-6 py-3 bg-black text-white text-sm font-semibold rounded-2xl hover:bg-gray-800 active:scale-95 transition-all shadow-lg shadow-black/20;
+    @apply px-6 py-3 bg-black dark:bg-white text-white dark:text-black text-sm font-semibold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-95 transition-all shadow-lg shadow-black/20 dark:shadow-white/10;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-2xl hover:bg-gray-50 active:scale-95 transition-all shadow-sm;
+    @apply px-6 py-3 bg-white dark:bg-paper-300 border border-gray-200 dark:border-paper-400 text-gray-700 dark:text-gray-200 text-sm font-semibold rounded-2xl hover:bg-gray-50 dark:hover:bg-paper-400 active:scale-95 transition-all shadow-sm;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 text-sm bg-white border border-gray-200/80 rounded-2xl focus:border-black focus:ring-1 focus:ring-black/10 focus:outline-none transition-all placeholder:text-gray-400 font-medium;
+    @apply w-full px-4 py-3 text-sm bg-white dark:bg-paper-100 border border-gray-200/80 dark:border-paper-300 rounded-2xl focus:border-black dark:focus:border-gray-500 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/10 focus:outline-none transition-all placeholder:text-gray-400 font-medium text-gray-900 dark:text-gray-100;
   }
 
   .sidebar {
-    @apply fixed left-0 top-0 h-full w-64 bg-paper-50/95 backdrop-blur-xl border-r border-paper-200/60 hidden lg:block z-50;
+    @apply fixed left-0 top-0 h-full w-64 bg-paper-50/95 dark:bg-paper-100/95 backdrop-blur-xl border-r border-paper-200/60 dark:border-paper-300/50 hidden lg:block z-50;
   }
 
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-paper-50/95 backdrop-blur-xl border-t border-paper-200/60 shadow-card-top lg:hidden pb-[env(safe-area-inset-bottom)];
+    @apply fixed bottom-0 left-0 right-0 bg-paper-50/95 dark:bg-paper-100/95 backdrop-blur-xl border-t border-paper-200/60 dark:border-paper-300/50 shadow-card-top lg:hidden pb-[env(safe-area-inset-bottom)];
+  }
+
+  /* Dark mode select and option styling */
+  .dark select {
+    color-scheme: dark;
+    color: rgb(250 250 250) !important;
+    background-color: rgb(30 30 35);
+  }
+
+  .dark select option {
+    background-color: rgb(30 30 35);
+    color: rgb(250 250 250);
+  }
+
+  .dark select option:hover,
+  .dark select option:checked {
+    background-color: rgb(45 45 50);
+  }
+}
+
+@layer base {
+  .dark *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dark *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background-color: rgb(45 45 50);
+    border-radius: 20px;
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(80 80 85);
+  }
+
+  .dark *::-webkit-scrollbar-corner {
+    background-color: transparent;
   }
 }
 

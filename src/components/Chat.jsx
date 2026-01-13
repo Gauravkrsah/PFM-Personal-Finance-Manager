@@ -142,6 +142,47 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
   const handleConfirmSave = async (category) => {
     if (!pendingTransactions) return
 
+    // Special handling for Loan: If person missing, try to extract from remarks/item
+    if (category === 'Loan' && !pendingTransactions[0].paid_by) {
+      const exp = pendingTransactions[0]
+      const text = (exp.remarks || exp.item || '').toLowerCase()
+
+      // Stopwords to ignore when looking for names
+      const stopWords = ['i', 'me', 'my', 'to', 'from', 'for', 'on', 'in', 'at', 'the', 'a', 'an', 'send', 'sent', 'gave', 'given', 'lent', 'borrowed', 'took', 'paid', 'loan', 'transaction', 'transfer', 'money', 'cash', 'online', 'upi']
+
+      let person = null
+      const words = (exp.remarks || exp.item || '').split(' ')
+
+      for (const word of words) {
+        const cleanWord = word.replace(/[^a-zA-Z]/g, '')
+        if (cleanWord.length > 2 && !stopWords.includes(cleanWord.toLowerCase())) {
+          person = cleanWord.charAt(0).toUpperCase() + cleanWord.slice(1).toLowerCase()
+          break
+        }
+      }
+
+      // If we found a likely person, UPDATE the UI to ask for specific loan type instead of saving generic loan
+      if (person) {
+        const updatedExpenses = pendingTransactions.map(e => ({
+          ...e,
+          paid_by: person
+        }))
+
+        setPendingTransactions(updatedExpenses)
+
+        // Also update the message to reflect the change so UI re-renders with new buttons
+        setMessages(prev => {
+          const newMessages = [...prev]
+          const lastMsg = newMessages[newMessages.length - 1]
+          if (lastMsg.type === 'confirmation') {
+            lastMsg.expenses = updatedExpenses
+          }
+          return newMessages
+        })
+        return // Stop here, let user choose specific type now
+      }
+    }
+
     try {
       // Override category for all pending transactions
       const updatedExpenses = pendingTransactions.map(exp => ({
@@ -205,25 +246,26 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ display: isVisible ? 'flex' : 'none' }}>
+    <div className="flex flex-col h-full relative" style={{ display: isVisible ? 'flex' : 'none' }}>
+
       <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-4 pb-48 lg:pb-48">
-        <div className="max-w-4xl mx-auto space-y-3">
+        <div className="max-w-4xl mx-auto space-y-3 pt-6">
           {messages.length === 0 && (
-            <div className="flex items-center justify-center min-h-[50vh] text-center text-gray-400">
+            <div className="flex items-center justify-center min-h-[50vh] text-center text-gray-400 dark:text-gray-500">
               <div>
                 <div className="text-4xl mb-2">💬</div>
-                <p className="text-sm">Add expenses or ask questions</p>
-                <p className="text-xs mt-1 text-gray-400">e.g., "lunch 250" or "total spent?"</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Add expenses or ask questions</p>
+                <p className="text-xs mt-1 text-gray-400 dark:text-gray-500">e.g., "lunch 250" or "total spent?"</p>
               </div>
             </div>
           )}
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.type === 'confirmation' ? (
-                <div className="max-w-[90%] lg:max-w-[80%] bg-amber-50 border border-amber-200 px-4 py-3 rounded-2xl">
-                  <p className="text-sm text-amber-800 mb-3">{msg.text}</p>
+                <div className="max-w-[90%] lg:max-w-[80%] bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 px-4 py-3 rounded-2xl">
+                  <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">{msg.text}</p>
                   {msg.expenses && msg.expenses.map((exp, j) => (
-                    <p key={j} className="text-sm font-medium text-gray-700 mb-2">
+                    <p key={j} className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                       Rs.{Math.abs(exp.amount).toLocaleString()} → {exp.remarks || exp.item}
                     </p>
                   ))}
@@ -231,7 +273,7 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
                     {/* Check if there's a person name in paid_by */}
                     {msg.expenses && msg.expenses[0]?.paid_by ? (
                       <>
-                        <p className="text-xs text-gray-500 mb-1">What type of transaction?</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">What type of transaction?</p>
                         <div className="flex flex-wrap gap-2">
                           {/* Check item/remarks for direction hint */}
                           {(() => {
@@ -255,6 +297,14 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
                                     className="px-3 py-2 text-xs font-medium bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 transition-colors">
                                     I paid back {exp.paid_by} → <span className="font-bold">PAID</span>
                                   </button>
+                                  <button onClick={() => handleConfirmSaveWithType('Income', 'received from', -Math.abs(exp.amount))}
+                                    className="px-3 py-2 text-xs font-medium bg-teal-100 text-teal-700 rounded-xl hover:bg-teal-200 transition-colors">
+                                    Income from {exp.paid_by} → <span className="font-bold">INCOME</span>
+                                  </button>
+                                  <button onClick={() => handleConfirmSaveWithType('Income', 'received from', -Math.abs(exp.amount))}
+                                    className="px-3 py-2 text-xs font-medium bg-teal-100 text-teal-700 rounded-xl hover:bg-teal-200 transition-colors">
+                                    Income from {exp.paid_by} → <span className="font-bold">INCOME</span>
+                                  </button>
                                 </>
                               )
                             }
@@ -270,6 +320,10 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
                                   <button onClick={() => handleConfirmSaveWithType('Loan', 'borrowed from', -Math.abs(exp.amount))}
                                     className="px-3 py-2 text-xs font-medium bg-orange-100 text-orange-700 rounded-xl hover:bg-orange-200 transition-colors">
                                     I borrowed from {exp.paid_by} → <span className="font-bold">BORROWED</span>
+                                  </button>
+                                  <button onClick={() => handleConfirmSaveWithType('Income', 'received from', -Math.abs(exp.amount))}
+                                    className="px-3 py-2 text-xs font-medium bg-teal-100 text-teal-700 rounded-xl hover:bg-teal-200 transition-colors">
+                                    Income from {exp.paid_by} → <span className="font-bold">INCOME</span>
                                   </button>
                                 </>
                               )
@@ -323,14 +377,14 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
                     )}
                     <button
                       onClick={handleCancelPending}
-                      className="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors self-start"
+                      className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-paper-300 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-paper-400 transition-colors self-start"
                     >
                       Cancel
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className={`max-w-[80%] lg:max-w-[70%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${msg.type === 'user' ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}`}>
+                <div className={`max-w-[80%] lg:max-w-[70%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${msg.type === 'user' ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-paper-200 text-gray-900 dark:text-gray-100'}`}>
                   {msg.text}
                 </div>
               )}
@@ -338,7 +392,7 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 px-4 py-2.5 rounded-2xl text-sm text-gray-500">...</div>
+              <div className="bg-gray-100 dark:bg-paper-200 px-4 py-2.5 rounded-2xl text-sm text-gray-500 dark:text-gray-400">...</div>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -346,24 +400,24 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
       </div>
 
       <div className="fixed bottom-14 lg:bottom-0 left-0 right-0 lg:left-56 z-30">
-        <div className="absolute inset-x-0 bottom-full h-16 bg-gradient-to-t from-paper-50 to-transparent pointer-events-none" />
-        <div className="bg-paper-50/80 backdrop-blur-xl px-4 lg:px-8 py-4 lg:pb-10 lg:pt-6">
+        <div className="absolute inset-x-0 bottom-full h-16 bg-gradient-to-t from-paper-50 dark:from-paper-50 to-transparent pointer-events-none" />
+        <div className="bg-paper-50/95 dark:bg-paper-50/95 backdrop-blur-xl px-4 lg:px-8 py-4 lg:pb-10 lg:pt-6">
           <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto flex items-center">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Add expense or ask question..."
-              className="w-full px-5 py-3 pr-12 text-sm border border-gray-300 rounded-full focus:border-black focus:outline-none focus:shadow-sm transition-all"
+              className="w-full px-5 py-3 pr-12 text-sm border border-gray-300 dark:border-paper-300/60 bg-white dark:bg-paper-100 text-ink-900 rounded-full focus:border-black dark:focus:border-gray-500 focus:outline-none focus:shadow-sm transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
               disabled={loading}
               autoFocus
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="absolute right-2 p-2 text-black hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              className="absolute right-2 p-2 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-paper-300 rounded-full disabled:opacity-30 disabled:hover:bg-transparent transition-all"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-black dark:border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <Send size={20} />
               )}

@@ -45,9 +45,40 @@ export default function Auth({ onAuth }) {
           setLoading(false)
           return
         }
-        const { error } = await supabase.auth.signUp({ email, password })
-        if (error) toast.error(error.message)
+        const { data: signUpData, error } = await supabase.auth.signUp({ email, password })
+        if (error) {
+          if (error.message.includes('already registered') || error.message.includes('already exists')) {
+            toast.info('You already have an account! Please sign in.')
+            setIsSignUp(false)
+          } else {
+            toast.error(error.message)
+          }
+        }
         else {
+          // If SignUp returns success, it might be a "Fake Success" for security (existing user).
+          // We probe this by trying to Sign In immediately.
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+
+          if (!signInError && signInData?.session) {
+            // It was an existing user with the SAME password (or auto-confirm is on). Log them in.
+            toast.success('Account exists! Logging you in...')
+            // onAuth will be triggered by the session listener in useEffect
+            return
+          }
+
+          if (signInError) {
+            if (signInError.message.includes('Invalid login credentials')) {
+              // User exists but password didn't match (meaning they signed up before).
+              toast.info('You already have an account! Please sign in.')
+              setIsSignUp(false)
+              setPassword('') // Clear password so user enters the correct one
+              setConfirmPassword('')
+              setLoading(false)
+              return
+            }
+            // If "Email not confirmed", then it IS a new user (or existing unconfirmed). Proceed to verify.
+          }
+
           toast.success('Account created — please verify')
           // Show verification instructions modal. Supabase will send an email link for confirmation.
           setShowVerification(true)
@@ -81,10 +112,31 @@ export default function Auth({ onAuth }) {
     }
     setLoading(true)
     try {
-      // Supabase verify OTP for signup
-      const { error } = await supabase.auth.verifyOtp({ type: 'signup', email, token: verificationCode })
+      // Try verifying as a Signup OTP first
+      let { data, error } = await supabase.auth.verifyOtp({ type: 'signup', email, token: verificationCode })
+
       if (error) {
-        toast.error(error.message)
+        console.log('Signup verification failed, trying as Login OTP (Magic Link)...', error.message)
+        // If that fails, try verifying as a Login/MagicLink OTP (in case they used the "Resend" button which sends a login code)
+        const result = await supabase.auth.verifyOtp({ type: 'magiclink', email, token: verificationCode })
+
+        // If magiclink succeeded, use that result
+        if (!result.error) {
+          data = result.data
+          error = null
+        } else {
+          // Also try type 'email' which is sometimes used for generic email OTPs
+          console.log('Magiclink verification failed, trying as generic Email OTP...', result.error.message)
+          const resultEmail = await supabase.auth.verifyOtp({ type: 'email', email, token: verificationCode })
+          if (!resultEmail.error) {
+            data = resultEmail.data
+            error = null
+          }
+        }
+      }
+
+      if (error) {
+        toast.error('Verification failed: ' + error.message)
       } else {
         toast.success('Verification successful — signing in')
         // After verifying, try to fetch session
@@ -104,12 +156,24 @@ export default function Auth({ onAuth }) {
       return
     }
     try {
-      // Send a new OTP to the user's email (signInWithOtp sends an email OTP)
+      console.log('Attempting to resend OTP via signInWithOtp (Login Code) to:', email)
+      // We use signInWithOtp because it often has better deliverability or works when signup emails are throttled
+      // This sends a "Magic Link" / Login OTP. Our verifyCode function handles this type too.
       const { error } = await supabase.auth.signInWithOtp({ email })
-      if (error) toast.error(error.message)
-      else toast.success('Verification code resent — check your email')
+
+      if (error) {
+        console.error('Resend error:', error)
+        if (error.status === 429) {
+          toast.error('Too many requests. Please wait ' + (error.message.match(/\d+/) || '60') + ' seconds.')
+        } else {
+          toast.error('Error resending: ' + error.message)
+        }
+      } else {
+        toast.success('Code sent! This may be different from the original signup code. Please check your email.')
+      }
     } catch (err) {
-      toast.error('Error: ' + err.message)
+      console.error('Resend exception:', err)
+      toast.error('Exception: ' + err.message)
     }
   }
 
@@ -184,54 +248,65 @@ export default function Auth({ onAuth }) {
   }
 
   return (<>
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-paper-50 transition-colors duration-300">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-black text-white flex items-center justify-center text-2xl font-bold">P</div>
-          <h1 className="text-2xl font-bold mb-1">PFM</h1>
-          <p className="text-sm text-gray-600">Personal Finance Manager</p>
+          <div className="w-16 h-16 mx-auto mb-4 bg-black dark:bg-paper-200 text-white flex items-center justify-center text-2xl font-bold rounded-2xl">P</div>
+          <h1 className="text-2xl font-bold mb-1 text-gray-900 dark:text-white">PFM</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Personal Finance Manager</p>
         </div>
 
-        <div className="bg-white border border-gray-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold mb-4">{isSignUp ? 'Create Account' : 'Sign In'}</h2>
+        <div className="bg-white dark:bg-paper-100 border border-gray-200 dark:border-paper-300 shadow-sm rounded-2xl p-6 transition-colors duration-300">
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{isSignUp ? 'Create Account' : 'Sign In'}</h2>
 
           <form onSubmit={handleAuth} className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" required />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pr-10"
+                  className="input-field pr-12"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
+                {password && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xs font-medium"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                )}
               </div>
             </div>
 
             {isSignUp && (
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Confirm Password</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="input-field pr-10"
+                    className="input-field pr-12"
                     required
                   />
+                  {confirmPassword && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xs font-medium"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -242,14 +317,14 @@ export default function Auth({ onAuth }) {
           </form>
 
           <div className="mt-3 text-center space-y-2">
-            <button onClick={enterDemoMode} className="text-sm text-blue-600 hover:underline block w-full">Try demo</button>
+            <button onClick={enterDemoMode} className="text-sm text-blue-600 hover:underline dark:text-blue-400 block w-full">Try demo</button>
             {!isSignUp && (
-              <button onClick={() => setShowForgotPassword(true)} className="text-sm text-blue-600 hover:underline block w-full">Forgot password?</button>
+              <button onClick={() => setShowForgotPassword(true)} className="text-sm text-blue-600 hover:underline dark:text-blue-400 block w-full">Forgot password?</button>
             )}
           </div>
 
           <div className="mt-4 text-center">
-            <button onClick={() => setIsSignUp(!isSignUp)} className="text-sm text-gray-600 hover:text-black">
+            <button onClick={() => setIsSignUp(!isSignUp)} className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-gray-200">
               {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
             </button>
           </div>
@@ -257,12 +332,12 @@ export default function Auth({ onAuth }) {
       </div>
     </div>
     {showVerification && (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-        <div className="bg-white border border-gray-200 shadow-lg max-w-md w-full p-6">
-          <h3 className="font-semibold mb-2">Confirm your signup</h3>
-          <p className="text-sm text-gray-700 mb-4">Enter the verification code we sent to your email.</p>
+      <div className="fixed inset-0 bg-black/40 dark:bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-paper-100 border border-gray-200 dark:border-paper-300 shadow-lg max-w-md w-full p-6 rounded-2xl">
+          <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">Confirm your signup</h3>
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">Enter the verification code we sent to your email.</p>
           <div className="mb-3">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Verification code</label>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Verification code</label>
             <input type="text" value={verificationCode} onChange={(e) => setVerificationCode(e.target.value)} className="input-field" placeholder="e.g. 097046" />
           </div>
           <div className="flex gap-2 justify-end">
@@ -274,17 +349,17 @@ export default function Auth({ onAuth }) {
       </div>
     )}
     {showForgotPassword && (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-        <div className="bg-white border border-gray-200 shadow-lg max-w-md w-full p-6">
-          <h3 className="font-semibold mb-2">Reset Password</h3>
-          <p className="text-sm text-gray-700 mb-4">
+      <div className="fixed inset-0 bg-black/40 dark:bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-paper-100 border border-gray-200 dark:border-paper-300 shadow-lg max-w-md w-full p-6 rounded-2xl">
+          <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">Reset Password</h3>
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
             {!otpSent ? 'Enter your email to receive an OTP' : 'Enter the OTP and your new password'}
           </p>
 
           {!otpSent ? (
             <>
               <div className="mb-3">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                 <input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} className="input-field" placeholder="your@email.com" />
               </div>
               <div className="flex gap-2 justify-end">
@@ -297,15 +372,15 @@ export default function Auth({ onAuth }) {
           ) : (
             <>
               <div className="mb-3">
-                <label className="block text-xs font-medium text-gray-700 mb-1">OTP Code</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">OTP Code</label>
                 <input type="text" value={resetOtp} onChange={(e) => setResetOtp(e.target.value)} className="input-field" placeholder="e.g. 123456" />
               </div>
               <div className="mb-3">
-                <label className="block text-xs font-medium text-gray-700 mb-1">New Password</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
                 <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field" />
               </div>
               <div className="mb-3">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Confirm New Password</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
                 <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className="input-field" />
               </div>
               <div className="flex gap-2 justify-end">
@@ -320,6 +395,5 @@ export default function Auth({ onAuth }) {
         </div>
       </div>
     )}
-  </>
-  )
+  </>)
 }

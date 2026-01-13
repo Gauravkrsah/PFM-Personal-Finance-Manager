@@ -1,5 +1,7 @@
 import React from 'react'
 import Header from '../Header'
+import ThemeToggle from '../ThemeToggle'
+
 
 const sidebarItems = [
     { id: 'chat', label: 'Chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
@@ -14,7 +16,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, curre
         <aside className="sidebar">
             <div className="p-6">
                 <button onClick={() => window.location.href = '/'} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <div className="w-10 h-10 bg-black text-white flex items-center justify-center text-sm font-bold rounded-2xl shadow-lg shadow-black/20">PFM</div>
+                    <div className="w-10 h-10 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-sm font-bold rounded-2xl shadow-lg shadow-black/20">PFM</div>
                 </button>
             </div>
 
@@ -24,8 +26,8 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, curre
                         key={item.id}
                         onClick={() => setActiveTab(item.id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all rounded-2xl ${activeTab === item.id
-                            ? 'bg-black text-white shadow-md shadow-black/10 translate-x-1'
-                            : 'text-gray-500 hover:bg-paper-200 hover:text-gray-900'
+                            ? 'bg-black dark:bg-white text-white dark:text-black shadow-md shadow-black/10 translate-x-1'
+                            : 'text-gray-500 dark:text-gray-400 hover:bg-paper-200 dark:hover:bg-paper-300 hover:text-black dark:hover:text-white'
                             }`}
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,9 +41,12 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, curre
             <div className="absolute bottom-0 left-0 right-0 p-4">
                 <div className="flex items-center gap-3">
                     <Header user={user} onLogout={onLogout} onProfileUpdate={() => { }} currentGroup={currentGroup} compact />
-                    <div className="text-sm font-medium text-gray-700">
-                        Hello, {user?.user_metadata?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}
+                    <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                            {user?.user_metadata?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}
+                        </div>
                     </div>
+                    <ThemeToggle />
                 </div>
             </div>
         </aside>

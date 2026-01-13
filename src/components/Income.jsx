@@ -148,15 +148,15 @@ const Income = forwardRef(({ currentGroup, user }, ref) => {
   }
 
   return (
-    <div className="card p-6 border-0 shadow-none bg-transparent sm:bg-white sm:shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:border sm:border-paper-200/60">
+    <div className="card p-6 border-0 shadow-none bg-transparent sm:bg-white dark:sm:bg-paper-100 sm:shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:border sm:border-paper-200/60 dark:sm:border-paper-300/50">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h2 className="font-semibold text-xl tracking-tight text-emerald-900">Income</h2>
-          <p className="text-gray-500 text-xs mt-0.5 sm:block hidden">Track your earnings and inflows</p>
+          <h2 className="font-semibold text-xl tracking-tight text-emerald-900 dark:text-emerald-500">Income</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5 sm:block hidden">Track your earnings and inflows</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <DateRangePicker value={dateRange} onChange={setDateRange} className="flex-1 sm:w-48" />
-          <button onClick={fetchIncomes} disabled={loading} className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700">
+          <button onClick={fetchIncomes} disabled={loading} className="px-3 py-2 text-xs bg-gray-100 dark:bg-paper-200 hover:bg-gray-200 dark:hover:bg-paper-300 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
             {loading ? '...' : 'Refresh'}
           </button>
         </div>
@@ -164,43 +164,43 @@ const Income = forwardRef(({ currentGroup, user }, ref) => {
 
       {/* Summary Cards - Horizontal scroll on mobile */}
       <div className="flex md:grid md:grid-cols-3 gap-3 mb-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-        <div className="bg-green-50 p-3 md:p-4 rounded-xl border border-green-100 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+        <div className="bg-green-50 dark:bg-green-900/20 p-3 md:p-4 rounded-xl border border-green-100 dark:border-green-900/30 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
           <div className="relative z-10">
-            <div className="text-[10px] md:text-xs font-semibold text-green-800 uppercase tracking-wide mb-1">Total Income</div>
-            <div className="text-lg md:text-2xl font-bold text-green-900">Rs.{filteredData.reduce((sum, inc) => sum + Math.abs(inc.amount || 0), 0).toLocaleString()}</div>
-            <div className="text-[10px] md:text-xs text-green-700 mt-1">{filteredData.length} transactions</div>
+            <div className="text-[10px] md:text-xs font-semibold text-green-800 dark:text-green-300 uppercase tracking-wide mb-1">Total Income</div>
+            <div className="text-lg md:text-2xl font-bold text-green-900 dark:text-green-200">Rs.{filteredData.reduce((sum, inc) => sum + Math.abs(inc.amount || 0), 0).toLocaleString()}</div>
+            <div className="text-[10px] md:text-xs text-green-700 dark:text-green-400 mt-1">{filteredData.length} transactions</div>
           </div>
-          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
+          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4 text-green-900 dark:text-green-500">
             <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.91 2.53 1.91 1.29 0 2.13-.73 2.13-1.65 0-1.22-1.28-1.57-3.04-1.93-2.26-.47-4.14-1.29-4.14-3.56 0-1.84 1.37-2.92 3.82-3.32V4h2.67v1.89c1.4.31 2.54 1.25 2.76 3.01h-2c-.17-.9-1.07-1.54-1.99-1.54-1.12 0-1.77.67-1.77 1.48 0 1.13 1.27 1.47 2.89 1.83 2.45.54 4.29 1.35 4.29 3.65 0 1.96-1.56 3.12-3.57 3.48z" /></svg>
           </div>
         </div>
 
-        <div className="bg-emerald-50 p-3 md:p-4 rounded-xl border border-emerald-100 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 md:p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
           <div className="relative z-10">
-            <div className="text-[10px] md:text-xs font-semibold text-emerald-800 uppercase tracking-wide mb-1">This Month</div>
-            <div className="text-lg md:text-2xl font-bold text-emerald-900">
+            <div className="text-[10px] md:text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide mb-1">This Month</div>
+            <div className="text-lg md:text-2xl font-bold text-emerald-900 dark:text-emerald-200">
               Rs.{filteredData.filter(inc => {
                 const incDate = new Date(inc.date);
                 const now = new Date();
                 return incDate.getMonth() === now.getMonth() && incDate.getFullYear() === now.getFullYear();
               }).reduce((sum, inc) => sum + Math.abs(inc.amount || 0), 0).toLocaleString()}
             </div>
-            <div className="text-[10px] md:text-xs text-emerald-700 mt-1">Current month</div>
+            <div className="text-[10px] md:text-xs text-emerald-700 dark:text-emerald-400 mt-1">Current month</div>
           </div>
-          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
+          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4 text-emerald-900 dark:text-emerald-500">
             <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.91 2.53 1.91 1.29 0 2.13-.73 2.13-1.65 0-1.22-1.28-1.57-3.04-1.93-2.26-.47-4.14-1.29-4.14-3.56 0-1.84 1.37-2.92 3.82-3.32V4h2.67v1.89c1.4.31 2.54 1.25 2.76 3.01h-2c-.17-.9-1.07-1.54-1.99-1.54-1.12 0-1.77.67-1.77 1.48 0 1.13 1.27 1.47 2.89 1.83 2.45.54 4.29 1.35 4.29 3.65 0 1.96-1.56 3.12-3.57 3.48z" /></svg>
           </div>
         </div>
 
-        <div className="bg-teal-50 p-3 md:p-4 rounded-xl border border-teal-100 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+        <div className="bg-teal-50 dark:bg-teal-900/20 p-3 md:p-4 rounded-xl border border-teal-100 dark:border-teal-900/30 shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink">
           <div className="relative z-10">
-            <div className="text-[10px] md:text-xs font-semibold text-teal-800 uppercase tracking-wide mb-1">Avg/Transaction</div>
-            <div className="text-lg md:text-2xl font-bold text-teal-900">
+            <div className="text-[10px] md:text-xs font-semibold text-teal-800 dark:text-teal-300 uppercase tracking-wide mb-1">Avg/Transaction</div>
+            <div className="text-lg md:text-2xl font-bold text-teal-900 dark:text-teal-200">
               Rs.{filteredData.length > 0 ? Math.round(filteredData.reduce((sum, inc) => sum + Math.abs(inc.amount || 0), 0) / filteredData.length).toLocaleString() : 0}
             </div>
-            <div className="text-[10px] md:text-xs text-teal-700 mt-1">Average amount</div>
+            <div className="text-[10px] md:text-xs text-teal-700 dark:text-teal-400 mt-1">Average amount</div>
           </div>
-          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
+          <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4 text-teal-900 dark:text-teal-500">
             <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.91 2.53 1.91 1.29 0 2.13-.73 2.13-1.65 0-1.22-1.28-1.57-3.04-1.93-2.26-.47-4.14-1.29-4.14-3.56 0-1.84 1.37-2.92 3.82-3.32V4h2.67v1.89c1.4.31 2.54 1.25 2.76 3.01h-2c-.17-.9-1.07-1.54-1.99-1.54-1.12 0-1.77.67-1.77 1.48 0 1.13 1.27 1.47 2.89 1.83 2.45.54 4.29 1.35 4.29 3.65 0 1.96-1.56 3.12-3.57 3.48z" /></svg>
           </div>
         </div>
@@ -213,7 +213,7 @@ const Income = forwardRef(({ currentGroup, user }, ref) => {
             placeholder="Search income..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-sm bg-paper-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder:text-gray-400"
+            className="w-full pl-10 pr-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 text-ink-900"
           />
           <svg className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -221,20 +221,20 @@ const Income = forwardRef(({ currentGroup, user }, ref) => {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-paper-100">
+      <div className="overflow-x-auto rounded-2xl border border-paper-100 dark:border-paper-300/50">
         <table className="w-full text-sm text-left min-w-[800px]">
           <thead>
-            <tr className="bg-emerald-50/30 border-b border-paper-100">
-              <th className="p-4 font-semibold text-emerald-900 text-xs uppercase tracking-wider">Date</th>
-              <th className="p-4 font-semibold text-emerald-900 text-xs uppercase tracking-wider">Source</th>
-              <th className="p-4 font-semibold text-emerald-900 text-xs uppercase tracking-wider">Category</th>
-              <th className="p-4 font-semibold text-emerald-900 text-xs uppercase tracking-wider">Amount</th>
-              <th className="p-4 font-semibold text-emerald-900 text-xs uppercase tracking-wider">Remarks</th>
-              <th className="p-4 font-semibold text-emerald-900 text-xs uppercase tracking-wider">Added by</th>
-              <th className="p-4 font-semibold text-emerald-900 text-xs uppercase tracking-wider text-right">Actions</th>
+            <tr className="bg-emerald-50/30 dark:bg-emerald-900/10 border-b border-paper-100 dark:border-paper-300/50">
+              <th className="p-4 font-semibold text-emerald-900 dark:text-emerald-100 text-xs uppercase tracking-wider">Date</th>
+              <th className="p-4 font-semibold text-emerald-900 dark:text-emerald-100 text-xs uppercase tracking-wider">Source</th>
+              <th className="p-4 font-semibold text-emerald-900 dark:text-emerald-100 text-xs uppercase tracking-wider">Category</th>
+              <th className="p-4 font-semibold text-emerald-900 dark:text-emerald-100 text-xs uppercase tracking-wider">Amount</th>
+              <th className="p-4 font-semibold text-emerald-900 dark:text-emerald-100 text-xs uppercase tracking-wider">Remarks</th>
+              <th className="p-4 font-semibold text-emerald-900 dark:text-emerald-100 text-xs uppercase tracking-wider">Added by</th>
+              <th className="p-4 font-semibold text-emerald-900 dark:text-emerald-100 text-xs uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-paper-100">
+          <tbody className="divide-y divide-paper-100 dark:divide-paper-300/30">
             {loading ? (
               <tr>
                 <td colSpan="7" className="p-8 text-center text-gray-500">Loading income...</td>
@@ -245,7 +245,7 @@ const Income = forwardRef(({ currentGroup, user }, ref) => {
               </tr>
             ) : (
               filteredData.map((income) => (
-                <tr key={income.id} className="hover:bg-paper-50/50 transition-colors group">
+                <tr key={income.id} className="hover:bg-paper-50/50 dark:hover:bg-paper-300/20 transition-colors group">
                   {editingId === income.id ? (
                     // Edit Mode
                     <>
@@ -267,17 +267,17 @@ const Income = forwardRef(({ currentGroup, user }, ref) => {
                   ) : (
                     // View Mode
                     <>
-                      <td className="p-4 text-gray-600 text-sm whitespace-nowrap">{new Date(income.date).toLocaleDateString()}</td>
-                      <td className="p-4 font-medium text-gray-900 text-sm">{income.item}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-300 text-sm whitespace-nowrap">{new Date(income.date).toLocaleDateString()}</td>
+                      <td className="p-4 font-medium text-gray-900 dark:text-gray-100 text-sm">{income.item}</td>
                       <td className="p-4">
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium border border-emerald-100">
+                        <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-medium border border-emerald-100 dark:border-emerald-800/30">
                           {income.category}
                         </span>
                       </td>
-                      <td className="p-4 font-bold text-emerald-700 text-sm">
+                      <td className="p-4 font-bold text-emerald-700 dark:text-emerald-400 text-sm">
                         +Rs.{income.amount.toLocaleString()}
                       </td>
-                      <td className="p-4 text-gray-700 text-sm max-w-[200px] truncate" title={income.remarks || ''}>
+                      <td className="p-4 text-gray-700 dark:text-gray-300 text-sm max-w-[200px] truncate" title={income.remarks || ''}>
                         {income.remarks || '-'}
                       </td>
                       <td className="p-4 text-gray-500 text-xs">
@@ -302,9 +302,9 @@ const Income = forwardRef(({ currentGroup, user }, ref) => {
               ))
             )}
           </tbody>
-          <tr className="bg-paper-50 border-t border-paper-100 font-medium">
-            <td className="p-4 text-gray-900" colSpan="3">Total Income</td>
-            <td className="p-4 text-emerald-700 font-bold">Rs.{filteredData.reduce((sum, inc) => sum + Math.abs(inc.amount || 0), 0).toLocaleString()}</td>
+          <tr className="bg-paper-50 dark:bg-paper-200/50 border-t border-paper-100 dark:border-paper-300/50 font-medium">
+            <td className="p-4 text-gray-900 dark:text-gray-100" colSpan="3">Total Income</td>
+            <td className="p-4 text-emerald-700 dark:text-emerald-400 font-bold">Rs.{filteredData.reduce((sum, inc) => sum + Math.abs(inc.amount || 0), 0).toLocaleString()}</td>
             <td className="p-4" colSpan="3"></td>
           </tr>
         </table>

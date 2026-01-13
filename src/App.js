@@ -10,6 +10,7 @@ import Loans from './components/Loans'
 import EnhancedAnalytics from './components/EnhancedAnalytics'
 import { ToastProvider } from './components/Toast'
 import MainLayout from './components/layout/MainLayout'
+import { ThemeProvider } from './context/ThemeContext'
 import { supabase } from './supabase'
 import { initializeMobile, getMobileStyles } from './mobile'
 import axios from 'axios'
@@ -26,6 +27,7 @@ function App() {
     } catch { return null }
   })
   const [showAddExpense, setShowAddExpense] = useState(false)
+  const [chatKey, setChatKey] = useState(0)
   const tableRef = useRef()
   const incomeRef = useRef()
   const loansRef = useRef()
@@ -168,7 +170,7 @@ function App() {
       >
         {activeTab === 'chat' && (
           <div className="flex flex-col h-full">
-            <div className="flex-shrink-0 bg-white/50 backdrop-blur-xl border-b border-paper-200 px-4 py-2 lg:px-8 z-10 sticky top-0">
+            <div className="flex-shrink-0 bg-white/50 dark:bg-paper-100/50 backdrop-blur-xl border-b border-paper-200 dark:border-paper-300/50 px-4 py-2 lg:px-8 z-10 sticky top-0">
               <div className="max-w-4xl mx-auto">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -178,26 +180,16 @@ function App() {
                       onGroupChange={setCurrentGroup}
                       onClearChat={() => {
                         localStorage.removeItem('pfm_messages')
-                        setActiveTab('expenses')
-                        setTimeout(() => setActiveTab('chat'), 0)
+                        setChatKey(k => k + 1)
                       }}
                     />
                   </div>
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem('pfm_messages')
-                      setActiveTab('expenses')
-                      setTimeout(() => setActiveTab('chat'), 0)
-                    }}
-                    className="hidden lg:block px-4 py-2 text-xs bg-paper-200 text-gray-700 rounded-xl hover:bg-paper-300 transition-colors font-semibold"
-                  >
-                    Clear Chat
-                  </button>
+
                 </div>
               </div>
             </div>
             <div className="flex-1 overflow-hidden">
-              <Chat onExpenseAdded={handleExpenseAdded} onTableRefresh={handleTableRefresh} user={user} currentGroup={currentGroup} isVisible={true} />
+              <Chat key={chatKey} onExpenseAdded={handleExpenseAdded} onTableRefresh={handleTableRefresh} user={user} currentGroup={currentGroup} isVisible={true} />
             </div>
           </div>
         )}
@@ -281,10 +273,10 @@ function App() {
         {/* Add Modal */}
         {showAddExpense && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end lg:items-center justify-center" onClick={() => setShowAddExpense(false)}>
-            <div className="bg-white w-full h-[90vh] lg:h-[600px] lg:w-[600px] lg:rounded-3xl shadow-2xl flex flex-col animate-slide-up lg:animate-scale-in" onClick={(e) => e.stopPropagation()}>
-              <div className="flex-shrink-0 flex items-center justify-between px-8 py-6 border-b border-gray-100">
-                <h3 className="font-display font-bold text-xl">Add Expense</h3>
-                <button onClick={() => setShowAddExpense(false)} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors">
+            <div className="bg-white dark:bg-paper-100 w-full h-[90vh] lg:h-[600px] lg:w-[600px] lg:rounded-3xl shadow-2xl flex flex-col animate-slide-up lg:animate-scale-in" onClick={(e) => e.stopPropagation()}>
+              <div className="flex-shrink-0 flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-paper-200">
+                <h3 className="font-display font-bold text-xl dark:text-white">Add Expense</h3>
+                <button onClick={() => setShowAddExpense(false)} className="bg-gray-100 dark:bg-paper-200 text-gray-600 dark:text-gray-300 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-paper-300 transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -295,7 +287,7 @@ function App() {
                   {/* Chat messages will go here */}
                 </div>
               </div>
-              <div className="flex-shrink-0 border-t border-gray-200 px-6 py-4">
+              <div className="flex-shrink-0 border-t border-gray-200 dark:border-paper-200 px-6 py-4">
                 <form onSubmit={async (e) => {
                   e.preventDefault()
                   const formData = new FormData(e.target)
@@ -316,10 +308,10 @@ function App() {
                   <input
                     name="expense"
                     placeholder="e.g., 500 on lunch, 200 on coffee"
-                    className="flex-1 px-4 py-3 text-sm border border-gray-300 rounded-full focus:border-black focus:outline-none transition-colors"
+                    className="flex-1 px-4 py-3 text-sm border border-gray-300 dark:border-paper-300 bg-white dark:bg-paper-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-full focus:border-black dark:focus:border-white focus:outline-none transition-colors"
                     autoFocus
                   />
-                  <button type="submit" className="w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 transition-all flex items-center justify-center text-lg flex-shrink-0">
+                  <button type="submit" className="w-10 h-10 bg-black dark:bg-white text-white dark:text-paper-100 rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all flex items-center justify-center text-lg flex-shrink-0">
                     ↑
                   </button>
                 </form>
@@ -332,14 +324,16 @@ function App() {
   }
 
   return (
-    <ToastProvider>
-      <Router>
-        <Routes>
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/" element={<MainApp />} />
-        </Routes>
-      </Router>
-    </ToastProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <Router>
+          <Routes>
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/" element={<MainApp />} />
+          </Routes>
+        </Router>
+      </ToastProvider>
+    </ThemeProvider>
   )
 }
 
