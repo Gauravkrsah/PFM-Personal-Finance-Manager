@@ -24,8 +24,8 @@ class ExpenseParser:
             'entertainment': ['movie', 'game', 'party', 'cinema', 'show', 'concert', 'film', 'picture', 'khel'],
             'accommodation': ['hotel', 'stay', 'booking', 'resort', 'lodge', 'guest house', 'airbnb'],
             'rent': ['rent', 'house', 'apartment', 'room', 'ghar', 'kotha', 'bhada'],
-            'loan': ['loan', 'lend', 'borrow', 'debt', 'rin', 'gave', 'diye', 'liye', 'udhar', 'qarz'],
-            'income': ['salary', 'bonus', 'incentive', 'refund', 'income', 'earning', 'payment', 'received'],
+            'loan': ['loan', 'lend', 'lent', 'borrow', 'borrowed', 'debt', 'rin', 'gave', 'diye', 'liye', 'udhar', 'qarz', 'paid back', 'repaid'],
+            'income': ['salary', 'bonus', 'incentive', 'refund', 'income', 'earning'],
             'education': ['admission', 'fee', 'tuition', 'school', 'college', 'university', 'course', 'class', 'book', 'study', 'education', 'exam', 'test']
         }
     
@@ -33,7 +33,13 @@ class ExpenseParser:
         expenses = []
         text = text.strip()
         
-        # Split by comma or 'and' and process each part
+        # FIRST: Normalize numbers with commas (100,000 -> 100000)
+        # Match patterns like 100,000 or 1,00,000 (Indian format)
+        text = re.sub(r'(\d{1,3}),(\d{3})\b', r'\1\2', text)  # 100,000 -> 100000
+        text = re.sub(r'(\d{1,2}),(\d{2}),(\d{3})\b', r'\1\2\3', text)  # 1,00,000 -> 100000
+        text = re.sub(r'(\d),(\d{2}),(\d{2}),(\d{3})\b', r'\1\2\3\4', text)  # 1,00,00,000 -> 10000000
+        
+        # Split by comma (now safe) or 'and' and process each part
         parts = re.split(r',|\band\b', text, flags=re.IGNORECASE)
         parts = [part.strip() for part in parts if part.strip()]
         
@@ -49,7 +55,169 @@ class ExpenseParser:
         """Parse a single expense from text with multiple pattern matching"""
         text = text.strip()
         
-        # FIRST: Try simple "amount item" pattern (most common)
+        # ============== LOAN PATTERNS FIRST (before generic patterns) ==============
+        
+        # Pattern: "i gave/lent person amount" like "i gave sonu 500" - needs confirmation (LENT or PAID?)
+        i_gave_pattern = r'^i\s+(?:gave|lent|sent)\s+([a-zA-Z]+)\s+(\d+)$'
+        i_gave_match = re.match(i_gave_pattern, text, re.IGNORECASE)
+        if i_gave_match:
+            person, amount = i_gave_match.groups()
+            return {
+                'amount': int(amount),  # Will be corrected by user
+                'item': 'i gave',  # Hint for frontend
+                'category': 'Other',  # Triggers confirmation
+                'remarks': f"I gave {person.title()} Rs.{amount}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "i borrowed/took amount from person" like "i borrowed 500 from sonu"
+        i_borrowed_pattern = r'^i\s+(?:borrowed|took)\s+(\d+)\s+from\s+([a-zA-Z]+)$'
+        i_borrowed_match = re.match(i_borrowed_pattern, text, re.IGNORECASE)
+        if i_borrowed_match:
+            amount, person = i_borrowed_match.groups()
+            return {
+                'amount': -int(amount),  # Negative = money coming in (debt)
+                'item': 'borrowed from',
+                'category': 'Loan',
+                'remarks': f"Borrowed from {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "person gave/lent amount" like "hari gave 400" (you received from them)
+        person_gave_pattern = r'^([a-zA-Z]+)\s+(?:gave|lent|sent)\s+(\d+)$'
+        person_gave_match = re.match(person_gave_pattern, text, re.IGNORECASE)
+        if person_gave_match:
+            person, amount = person_gave_match.groups()
+            return {
+                'amount': -int(amount),  # Negative = money coming in (you received)
+                'item': 'received from',
+                'category': 'Loan',
+                'remarks': f"Received from {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "person borrowed amount" like "hari borrowed 400" (you lent to them)
+        person_borrowed_pattern = r'^([a-zA-Z]+)\s+(?:borrowed|took)\s+(\d+)$'
+        person_borrowed_match = re.match(person_borrowed_pattern, text, re.IGNORECASE)
+        if person_borrowed_match:
+            person, amount = person_borrowed_match.groups()
+            return {
+                'amount': int(amount),  # Positive = money going out (you lent)
+                'item': 'lent to',
+                'category': 'Loan',
+                'remarks': f"Lent to {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "person paid amount" like "hari paid 400" (they paid back)
+        person_paid_pattern = r'^([a-zA-Z]+)\s+paid\s+(\d+)$'
+        person_paid_match = re.match(person_paid_pattern, text, re.IGNORECASE)
+        if person_paid_match:
+            person, amount = person_paid_match.groups()
+            return {
+                'amount': -int(amount),  # Negative = money coming in (repayment)
+                'item': 'received from',
+                'category': 'Loan',
+                'remarks': f"Paid back by {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "amount received/got from person" like "100 received from rahul"
+        amount_received_pattern = r'^(\d+)\s+(?:received|got|returned)\s+from\s+([a-zA-Z]+)'
+        amount_received_match = re.match(amount_received_pattern, text, re.IGNORECASE)
+        if amount_received_match:
+            amount, person = amount_received_match.groups()
+            return {
+                'amount': -int(amount),  # Negative = money coming in
+                'item': 'received from',
+                'category': 'Loan',
+                'remarks': f"Received from {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "got/received amount from person" like "got 400 from ram" (verb first)
+        verb_received_pattern = r'^(?:got|received|returned)\s+(\d+)\s+from\s+([a-zA-Z]+)'
+        verb_received_match = re.match(verb_received_pattern, text, re.IGNORECASE)
+        if verb_received_match:
+            amount, person = verb_received_match.groups()
+            return {
+                'amount': -int(amount),  # Negative = money coming in
+                'item': 'received from',
+                'category': 'Loan',
+                'remarks': f"Received from {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "amount paid to person" like "500 paid to ram"
+        amount_paid_pattern = r'^(\d+)\s+paid\s+to\s+([a-zA-Z]+)'
+        amount_paid_match = re.match(amount_paid_pattern, text, re.IGNORECASE)
+        if amount_paid_match:
+            amount, person = amount_paid_match.groups()
+            return {
+                'amount': int(amount),  # Positive = money going out
+                'item': 'paid to',
+                'category': 'Loan',
+                'remarks': f"Paid to {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "amount borrowed/took from person" like "5000 borrowed from sonu"
+        amount_borrowed_pattern = r'^(\d+)\s+(?:borrowed|took)\s+from\s+([a-zA-Z]+)'
+        amount_borrowed_match = re.match(amount_borrowed_pattern, text, re.IGNORECASE)
+        if amount_borrowed_match:
+            amount, person = amount_borrowed_match.groups()
+            return {
+                'amount': -int(amount),  # Negative = money coming in (debt)
+                'item': 'borrowed from',
+                'category': 'Loan',
+                'remarks': f"Borrowed from {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern: "amount lent/gave to person" like "100 lent to rahul"
+        amount_lent_pattern = r'^(\d+)\s+(?:lent|gave|lend|sent)\s+to\s+([a-zA-Z]+)'
+        amount_lent_match = re.match(amount_lent_pattern, text, re.IGNORECASE)
+        if amount_lent_match:
+            amount, person = amount_lent_match.groups()
+            return {
+                'amount': int(amount),  # Positive = money going out
+                'item': 'lent to',
+                'category': 'Loan',
+                'remarks': f"Lent to {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # ============== AMBIGUOUS PATTERNS (need confirmation) ==============
+        
+        # Pattern: "amount from person" - ambiguous, could be received OR borrowed
+        ambiguous_from_pattern = r'^(\d+)\s+from\s+([a-zA-Z]+)$'
+        ambiguous_from_match = re.match(ambiguous_from_pattern, text, re.IGNORECASE)
+        if ambiguous_from_match:
+            amount, person = ambiguous_from_match.groups()
+            return {
+                'amount': int(amount),  # Will be corrected by user
+                'item': 'from person',  # Hint for frontend (money coming in)
+                'category': 'Other',  # Triggers confirmation
+                'remarks': f"Rs.{amount} from {person.title()}",
+                'paid_by': person.title()  # Important! Sets person for UI
+            }
+        
+        # Pattern: "amount to person" - ambiguous, could be lent OR paid
+        ambiguous_to_pattern = r'^(\d+)\s+to\s+([a-zA-Z]+)$'
+        ambiguous_to_match = re.match(ambiguous_to_pattern, text, re.IGNORECASE)
+        if ambiguous_to_match:
+            amount, person = ambiguous_to_match.groups()
+            return {
+                'amount': int(amount),  # Will be corrected by user
+                'item': 'to person',  # Hint for frontend (money going out)
+                'category': 'Other',  # Triggers confirmation
+                'remarks': f"Rs.{amount} to {person.title()}",
+                'paid_by': person.title()  # Important! Sets person for UI
+            }
+        
+        # ============== GENERIC PATTERNS (fallback) ==============
+        
+        # "amount item" pattern (most common) - AFTER loan patterns
         simple_pattern = r'^(\d+)\s+(.+)$'
         simple_match = re.match(simple_pattern, text)
         if simple_match:
@@ -118,29 +286,121 @@ class ExpenseParser:
                 'paid_by': None
             }
         
-        # Pattern 0d: "got back/received amount from person" like "got back 400 from sonu"
+        # Pattern 0d: "got back/received amount from person" like "got back 400 from sonu" or "received 100 from rahul"
         repayment_pattern = r'^(?:got\s+back|received|returned)\s+(\d+)\s+from\s+([a-zA-Z]+)'
         repayment_match = re.match(repayment_pattern, text, re.IGNORECASE)
         if repayment_match:
             amount, person = repayment_match.groups()
             return {
-                'amount': -int(amount),  # Negative for income
-                'item': 'loan repayment',
+                'amount': -int(amount),  # Negative = money coming in
+                'item': 'received from',
                 'category': 'Loan',
-                'remarks': f"Loan repaid by {person.title()}",
+                'remarks': f"Received from {person.title()}",
                 'paid_by': person.title()
             }
         
-        # Pattern 1a: "gave person amount for duration" like "gave sonu 400 for a week"
+        # Pattern 0d2: "amount received from person" like "100 received from rahul"
+        amount_received_pattern = r'^(\d+)\s+(?:received|got|returned)\s+from\s+([a-zA-Z]+)'
+        amount_received_match = re.match(amount_received_pattern, text, re.IGNORECASE)
+        if amount_received_match:
+            amount, person = amount_received_match.groups()
+            return {
+                'amount': -int(amount),  # Negative = money coming in
+                'item': 'received from',
+                'category': 'Loan',
+                'remarks': f"Received from {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern 0d3: "paid amount to person" like "paid 500 to ram"
+        paid_to_pattern = r'^paid\s+(\d+)\s+to\s+([a-zA-Z]+)'
+        paid_to_match = re.match(paid_to_pattern, text, re.IGNORECASE)
+        if paid_to_match:
+            amount, person = paid_to_match.groups()
+            return {
+                'amount': int(amount),  # Positive = money going out
+                'item': 'paid to',
+                'category': 'Loan',
+                'remarks': f"Paid to {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern 0d4: "amount paid to person" like "500 paid to ram"
+        amount_paid_pattern = r'^(\d+)\s+paid\s+to\s+([a-zA-Z]+)'
+        amount_paid_match = re.match(amount_paid_pattern, text, re.IGNORECASE)
+        if amount_paid_match:
+            amount, person = amount_paid_match.groups()
+            return {
+                'amount': int(amount),  # Positive = money going out
+                'item': 'paid to',
+                'category': 'Loan',
+                'remarks': f"Paid to {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern 0e: "took/borrowed/received [back] [loan] from person amount"
+        # Handles: "recived back loan from hari 100000"
+        borrow_pattern = r'^(?:took|borrowed|received|recived|recieved|got)(?:\s+back)?\s+(?:loan\s+)?from\s+([a-zA-Z]+)\s+(\d+)'
+        borrow_match = re.match(borrow_pattern, text, re.IGNORECASE)
+        if borrow_match:
+            person, amount = borrow_match.groups()
+            return {
+                'amount': -int(amount),  # Negative for loan taken/repaid
+                'item': 'loan transaction',
+                'category': 'Loan',
+                'remarks': f"Loan transaction with {person.title()}",
+                'paid_by': person.title()
+            }
+
+        # Pattern 0f: "took/borrowed amount from person" like "borrowed 5000 from sonu"
+        borrow_pattern_2 = r'^(?:took|borrowed)\s+(\d+)\s+(?:loan\s+)?from\s+([a-zA-Z]+)'
+        borrow_match_2 = re.match(borrow_pattern_2, text, re.IGNORECASE)
+        if borrow_match_2:
+            amount, person = borrow_match_2.groups()
+            return {
+                'amount': -int(amount),  # Negative for loan taken
+                'item': 'borrowed from',
+                'category': 'Loan',
+                'remarks': f"Borrowed from {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern 0f2: "amount borrowed from person" like "5000 borrowed from sonu"
+        amount_borrowed_pattern = r'^(\d+)\s+(?:borrowed|took)\s+from\s+([a-zA-Z]+)'
+        amount_borrowed_match = re.match(amount_borrowed_pattern, text, re.IGNORECASE)
+        if amount_borrowed_match:
+            amount, person = amount_borrowed_match.groups()
+            return {
+                'amount': -int(amount),  # Negative for loan taken
+                'item': 'borrowed from',
+                'category': 'Loan',
+                'remarks': f"Borrowed from {person.title()}",
+                'paid_by': person.title()
+            }
+
+        # Pattern 1a: "lent/gave amount to person" like "lent 100 to Rahul"
+        lent_to_pattern = r'^(?:lent|gave|lend|sent)\s+(\d+)\s+to\s+([a-zA-Z]+)'
+        lent_to_match = re.match(lent_to_pattern, text, re.IGNORECASE)
+        if lent_to_match:
+            amount, person = lent_to_match.groups()
+            return {
+                'amount': int(amount),
+                'item': 'loan given',
+                'category': 'Loan',
+                'remarks': f"Lent to {person.title()}",
+                'paid_by': person.title()
+            }
+        
+        # Pattern 1b: "gave person amount for duration" like "gave sonu 400 for a week"
         gave_duration_pattern = r'^(?:gave|lend|lent)\s+([a-zA-Z]+)\s+(\d+)\s+for\s+(.+)$'
         gave_duration_match = re.match(gave_duration_pattern, text, re.IGNORECASE)
         if gave_duration_match:
             person, amount, duration = gave_duration_match.groups()
             return {
                 'amount': int(amount),
-                'item': 'loan',
+                'item': 'loan given',
                 'category': 'Loan',
-                'remarks': f"Loan given to {person.title()} for {duration}",
+                'remarks': f"Lent to {person.title()} for {duration}",
                 'paid_by': person.title()
             }
         
@@ -533,43 +793,51 @@ class NLPService:
         """Use AI to intelligently parse expense text"""
         try:
             prompt = f"""
-You are an intelligent expense parser. Parse this text into structured expense data.
+You are an intelligent personal finance assistant. Parse the following text into structured transaction data.
+Your goal is to "understand" the intent behind the transaction, not just match keywords.
 
-Text: "{text}"
+Text to Parse: "{text}"
 
-Rules:
-1. ALWAYS extract expenses from ANY text that mentions money/amounts
-2. Be flexible - understand context and intent, not just exact patterns
-3. Handle simple formats like "100 chiya", "300 admission fee", "50 tea"
-4. Categories: Food, Transport, Groceries, Shopping, Utilities, Entertainment, Rent, Loan, Income, Medical, Education, Travel, Other
-5. Income (negative amounts): salary, bonus, refund, got back, received
-6. Loans:
-   - "gave/lend to person" = POSITIVE amount (you gave loan)
-   - "taken/borrowed from person" = NEGATIVE amount (you took loan)
-   - "paid person" or "paid person's loan" = POSITIVE amount (you repaid loan)
-   - "received from person" = NEGATIVE amount (they repaid you)
+LOGIC & REASONING RULES:
+1. **Loans vs Income**:
+   - If I "took", "borrowed", "got", "received" money FROM A PERSON, it is a **LOAN (Debt)**. The amount must be **NEGATIVE**.
+   - If I "took", "borrowed" money from a BANK/APP, it is also a **LOAN**.
+   - "Salary", "Bonus", "Refund" are **INCOME** (Negative amount), but NOT loans.
+   - If specific words like "loan", "lend", "borrow" are missing, but the context implies it (e.g., "took 5k from Ravi"), treat it as a LOAN.
 
-Examples:
-- "100 chiya" → {{"amount": 100, "item": "chiya", "category": "Food", "remarks": "Chiya"}}
-- "300 admission fee" → {{"amount": 300, "item": "admission fee", "category": "Education", "remarks": "Admission Fee"}}
-- "50 tea" → {{"amount": 50, "item": "tea", "category": "Food", "remarks": "Tea"}}
-- "500 on biryani" → {{"amount": 500, "item": "biryani", "category": "Food", "remarks": "Biryani"}}
-- "gave sonu 400" → {{"amount": 400, "item": "loan", "category": "Loan", "remarks": "Loan given to Sonu", "paid_by": "Sonu"}}
-- "taken loan from munchun 4000" → {{"amount": -4000, "item": "loan", "category": "Loan", "remarks": "Loan taken from Munchun", "paid_by": "Munchun"}}
-- "paid munchun 3000" → {{"amount": 3000, "item": "loan repayment", "category": "Loan", "remarks": "Loan repaid to Munchun", "paid_by": "Munchun"}}
-- "got salary 50000" → {{"amount": -50000, "item": "salary", "category": "Income", "remarks": "Salary received"}}
+2. **Loans vs Expenses**:
+   - If I "gave", "lend", "sent", "paid" money TO A PERSON (without buying an item), it is a **LOAN GIVEN**. The amount is **POSITIVE**.
+   - If I "paid" a person for an item (e.g. "Paid Ravi for Momos"), it is an **EXPENSE** (Food).
 
-IMPORTANT:
-- If you find ANY amount and item, create an expense entry
-- For loans: "taken from" = NEGATIVE, "gave to" = POSITIVE, "paid to" = POSITIVE
-- Don't be strict about format
+3. **Categories**:
+   - Use standard categories: Food, Transport, Groceries, Shopping, Utilities, Entertainment, Rent, Loan, Income, Medical, Education, Travel.
+   - If unsure, use "Other".
 
-Return ONLY valid JSON:
+4. **Numbers & Units (IMPORTANT)**:
+   - Convert units to full numbers:
+   - "k" = 1,000 (e.g., "5k" -> 5000)
+   - "Lakh", "Lac", "L" = 100,000 (e.g., "1.5 lakh" -> 150000)
+   - "Crore", "Cr" = 10,000,000
+
+5. **Formatting**:
+   - "paid_by": For expenses, who paid? For loans, who is the other person?
+   - "remarks": Generate a short, clear summary.
+
+EXAMPLES:
+- \"lent 100 to rahul\" -> {{"amount": 100, "item": "loan given", "category": "Loan", "remarks": "Lent to Rahul", "paid_by": "Rahul"}}
+- \"borrowed 5000 from sonu\" -> {{"amount": -5000, "item": "loan taken", "category": "Loan", "remarks": "Borrowed from Sonu", "paid_by": "Sonu"}}
+- \"received 1000 from hari\" -> {{"amount": -1000, "item": "received payment", "category": "Loan", "remarks": "Received from Hari", "paid_by": "Hari"}}
+- \"paid 500 to ram\" -> {{"amount": 500, "item": "paid", "category": "Loan", "remarks": "Paid to Ram", "paid_by": "Ram"}}
+- \"took 50000 from ard\" -> {{"amount": -50000, "item": "loan taken", "category": "Loan", "remarks": "Loan taken from Ard", "paid_by": "Ard"}}
+- \"gave rahul 2000\" -> {{"amount": 2000, "item": "loan given", "category": "Loan", "remarks": "Loan given to Rahul", "paid_by": "Rahul"}}
+- \"paid sonu 500 for lunch\" -> {{"amount": 500, "item": "lunch", "category": "Food", "remarks": "Lunch (Paid by Sonu)", "paid_by": "Sonu"}}
+- \"salary received 100000\" -> {{"amount": -100000, "item": "salary", "category": "Income", "remarks": "Salary Received", "paid_by": null}}
+
+Return ONLY valid JSON structure:
 {{
   "expenses": [
-    {{"amount": 100, "item": "chiya", "category": "Food", "remarks": "Chiya", "paid_by": null}}
-  ],
-  "reply": "SUCCESS: Added Rs.100 -> Food (Chiya)"
+    {{"amount": -50000, "item": "loan taken", "category": "Loan", "remarks": "Loan taken from Ard", "paid_by": "Ard"}}
+  ]
 }}
 """
             
@@ -593,7 +861,7 @@ Return ONLY valid JSON:
                         if 'reply' not in parsed_data:
                             count = len(parsed_data['expenses'])
                             total = sum(exp.get('amount', 0) for exp in parsed_data['expenses'])
-                            parsed_data['reply'] = f"SUCCESS: Added {count} expenses totaling Rs.{total}"
+                            parsed_data['reply'] = f"SUCCESS: Added {count} transactions (AI)"
                         return parsed_data
             
             return None
@@ -602,10 +870,46 @@ Return ONLY valid JSON:
             print(f"[AI_PARSE] Error: {e}")
             return None
     
+    def _preprocess_text(self, text):
+        """Pre-process text to handle units like k, lakh, crore"""
+        if not text:
+            return text
+            
+        text = text.lower()
+        
+        def replace_match(match):
+            number = float(match.group(1))
+            unit = match.group(2).lower()
+            
+            if 'c' in unit: # crore, cr
+                return str(int(number * 10000000))
+            elif 'l' in unit: # lakh, lac
+                return str(int(number * 100000))
+            elif 'k' in unit:
+                return str(int(number * 1000))
+            return match.group(0)
+
+        # Pattern for decimal numbers followed by unit
+        # 1.5k, 10 lakh, 1.25 cr
+        # Added strict word boundary or whitespace check to avoid matching inside words if needed, 
+        # but the unit list is specific enough with the order fix.
+        pattern = r'(\d+(?:\.\d+)?)\s*(k|lakh|lac|l|crore|cr)\b'
+        
+        try:
+            processed_text = re.sub(pattern, replace_match, text, flags=re.IGNORECASE)
+            return processed_text
+        except Exception as e:
+            print(f"[PREPROCESS] Error: {e}")
+            return text
+
     async def parse_expense(self, text: str):
         """Parse expense text and return structured data"""
         try:
             print(f"[PARSE] Processing: {text}")
+            
+            # Pre-process text to handle units
+            text = self._preprocess_text(text)
+            print(f"[PARSE] Pre-processed: {text}")
             
             # Try AI-enhanced parsing first if Gemini is available
             if self.gemini_available:

@@ -13,6 +13,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
   const [loadingMembers, setLoadingMembers] = useState(false)
   const [showMembers, setShowMembers] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const toast = useToast()
 
   const fetchGroups = useCallback(async () => {
@@ -21,13 +22,13 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
         .from('group_members')
         .select('groups(*)')
         .eq('user_id', user.id)
-      
+
       if (error) {
         // Error handled silently
       } else {
         const fetchedGroups = data?.map(item => item.groups) || []
         setGroups(fetchedGroups)
-        
+
         // Validate current group still exists
         if (currentGroup && !fetchedGroups.find(g => g.id === currentGroup.id)) {
           onGroupChange(null)
@@ -44,7 +45,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
       .select('*, groups(name)')
       .eq('invited_email', user.email)
       .eq('status', 'pending')
-    
+
     setInvitations(data || [])
   }, [user])
 
@@ -117,11 +118,11 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
       .from('group_invitations')
       .update({ status: 'accepted' })
       .eq('id', invitationId)
-    
+
     await supabase
       .from('group_members')
       .insert({ group_id: groupId, user_id: user.id })
-    
+
     fetchGroups()
     fetchInvitations()
   }
@@ -130,23 +131,23 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
     e.preventDefault()
     if (isProcessing) return
     setIsProcessing(true)
-    
+
     try {
       const { data, error } = await supabase
         .from('groups')
         .insert({ name: groupName, created_by: user.id })
         .select()
-      
+
       if (error) {
         toast.error('Error creating group: ' + error.message)
         return
       }
-      
+
       if (data?.[0]) {
         const { error: memberError } = await supabase
           .from('group_members')
           .insert({ group_id: data[0].id, user_id: user.id })
-        
+
         if (memberError) {
           toast.error('Group created but error adding you as member: ' + memberError.message)
         } else {
@@ -167,7 +168,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
   const leaveGroup = async () => {
     if (!currentGroup || isProcessing) return
     setIsProcessing(true)
-    
+
     toast.confirm(
       'Are you sure you want to leave this group?',
       async () => {
@@ -176,7 +177,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
           .delete()
           .eq('group_id', currentGroup.id)
           .eq('user_id', user.id)
-        
+
         onGroupChange(null)
         fetchGroups()
         toast.success('Left group successfully')
@@ -189,7 +190,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
   const deleteGroup = async () => {
     if (!currentGroup || currentGroup.created_by !== user.id || isProcessing) return
     setIsProcessing(true)
-    
+
     toast.confirm(
       'Are you sure you want to delete this group? This cannot be undone.',
       async () => {
@@ -197,9 +198,9 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
           await supabase.from('group_members').delete().eq('group_id', currentGroup.id)
           await supabase.from('group_invitations').delete().eq('group_id', currentGroup.id)
           await supabase.from('expenses').delete().eq('group_id', currentGroup.id)
-          
+
           const { error } = await supabase.from('groups').delete().eq('id', currentGroup.id)
-          
+
           if (error) {
             toast.error('Error deleting group: ' + error.message)
           } else {
@@ -220,7 +221,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
   const inviteUser = async (e) => {
     e.preventDefault()
     if (!currentGroup) return
-    
+
     try {
       const { error } = await supabase
         .from('group_invitations')
@@ -229,7 +230,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
           invited_email: inviteEmail,
           invited_by: user.id
         })
-      
+
       if (error) {
         toast.error('Error sending invitation: ' + (error.message || 'Unknown error'))
       } else {
@@ -261,7 +262,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
           </div>
         </div>
       )}
-      
+
       <div className="w-full">
         <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap">
           <select
@@ -278,7 +279,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
               <option key={group.id} value={group.id}>👥 {group.name}</option>
             ))}
           </select>
-          
+
           <button
             onClick={() => setShowCreate(true)}
             className="px-3 py-2 text-xs bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium whitespace-nowrap"
@@ -286,95 +287,135 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
             + New
           </button>
 
-          {/* Mobile: Clear Chat inline with top row */}
-          <button
-            onClick={onClearChat}
-            className="lg:hidden px-3 py-2 text-xs bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium ml-2 whitespace-nowrap"
-          >
-            Clear Chat
-          </button>
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden relative ml-auto">
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </button>
 
-          {currentGroup && (
-            <>
-              <button
-                onClick={() => setShowMembers(!showMembers)}
-                className="hidden lg:block px-3 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                👥 Members
-              </button>
-              
-              <form onSubmit={inviteUser} className="hidden lg:flex gap-1.5 ml-auto">
-                <input
-                  type="email"
-                  placeholder="Invite email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent w-36"
+            {showMobileMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowMobileMenu(false)}
                 />
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 py-1 overflow-hidden">
+                  <button
+                    onClick={() => {
+                      onClearChat();
+                      setShowMobileMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50"
+                  >
+                    <span>🗑️</span> Clear Chat
+                  </button>
+
+                  {currentGroup && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setShowInviteModal(true);
+                          setShowMobileMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <span>✉️</span> Invite Member
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowMembers(!showMembers);
+                          setShowMobileMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <span>👥</span> {showMembers ? 'Hide Members' : 'View Members'}
+                      </button>
+
+                      <div className="h-px bg-gray-100 my-1"></div>
+
+                      <button
+                        onClick={() => {
+                          leaveGroup();
+                          setShowMobileMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-amber-600 hover:bg-amber-50 flex items-center gap-2"
+                      >
+                        <span>👋</span> Leave Group
+                      </button>
+
+                      {currentGroup.created_by === user.id && (
+                        <button
+                          onClick={() => {
+                            deleteGroup();
+                            setShowMobileMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
+                          <span>⚠️</span> Delete Group
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center gap-2 ml-auto">
+            {currentGroup && (
+              <>
                 <button
-                  type="submit"
-                  className="px-3 py-2 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                  onClick={() => setShowMembers(!showMembers)}
+                  className="px-3 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
-                  Invite
+                  👥 Members
                 </button>
-              </form>
-              
-              <button
-                onClick={leaveGroup}
-                disabled={isProcessing}
-                className="hidden lg:block px-3 py-2 text-xs bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                Leave
-              </button>
-              
-              {currentGroup.created_by === user.id && (
+
+                <form onSubmit={inviteUser} className="flex gap-1.5">
+                  <input
+                    type="email"
+                    placeholder="Invite email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent w-36"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-2 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                  >
+                    Invite
+                  </button>
+                </form>
+
                 <button
-                  onClick={deleteGroup}
+                  onClick={leaveGroup}
                   disabled={isProcessing}
-                  className="hidden lg:block px-3 py-2 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-3 py-2 text-xs bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                 >
-                  Delete
+                  Leave
                 </button>
-              )}
-              
-              <button
-                onClick={() => setShowInviteModal(true)}
-                className="lg:hidden px-3 py-2 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-              >
-                Invite
-              </button>
-            </>
-          )}
+
+                {currentGroup.created_by === user.id && (
+                  <button
+                    onClick={deleteGroup}
+                    disabled={isProcessing}
+                    className="px-3 py-2 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  >
+                    Delete
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-
-      {currentGroup && (
-        <div className="mt-2 flex items-center gap-1.5 lg:hidden">
-          <button
-            onClick={() => setShowMembers(!showMembers)}
-            className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-          >
-            Members
-          </button>
-          <button
-            onClick={leaveGroup}
-            disabled={isProcessing}
-            className="px-2 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
-          >
-            Leave
-          </button>
-          {currentGroup.created_by === user.id && (
-            <button
-              onClick={deleteGroup}
-              disabled={isProcessing}
-              className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-            >
-              Delete
-            </button>
-          )}
-          {/* Clear Chat moved to the top row for mobile */}
-        </div>
-      )}
 
       {showInviteModal && currentGroup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -423,7 +464,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
                 </svg>
               </button>
             </div>
-            
+
             <form onSubmit={createGroup} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Group Name</label>
@@ -436,9 +477,9 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
                   autoFocus
                 />
               </div>
-              
+
               <div className="flex space-x-3 pt-4">
-                <button 
+                <button
                   type="submit"
                   disabled={isProcessing}
                   className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
@@ -478,7 +519,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
               </button>
             </div>
           </h4>
-          
+
           {loadingMembers ? (
             <div className="text-center py-6 text-gray-500">
               <div className="text-2xl mb-2">👥</div>
@@ -492,14 +533,12 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
               {groupMembers.map((member, idx) => {
                 const isAdmin = member.user_id === currentGroup.created_by
                 const isCurrentUser = member.user_id === user?.id
-                
+
                 return (
-                  <div key={idx} className={`flex items-center space-x-3 p-3 rounded-lg border-2 ${
-                    isAdmin ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-200'
-                  }`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
-                      isAdmin ? 'bg-yellow-500' : 'bg-blue-500'
+                  <div key={idx} className={`flex items-center space-x-3 p-3 rounded-lg border-2 ${isAdmin ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-200'
                     }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${isAdmin ? 'bg-yellow-500' : 'bg-blue-500'
+                      }`}>
                       {(member.users?.full_name || member.users?.email || 'U').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -534,7 +573,7 @@ export default function GroupManager({ user, currentGroup, onGroupChange, onClea
               </button>
             </div>
           )}
-          
+
           <div className="mt-4 pt-3 border-t border-blue-200">
             <div className="flex flex-wrap gap-4 text-xs text-blue-600">
               <span>👑 Admin: {groupMembers.find(m => m.user_id === currentGroup.created_by)?.users?.full_name || groupMembers.find(m => m.user_id === currentGroup.created_by)?.users?.email?.split('@')[0] || 'Unknown'}</span>

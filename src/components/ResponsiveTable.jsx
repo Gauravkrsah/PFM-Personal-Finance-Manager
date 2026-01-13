@@ -13,7 +13,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
   const fetchUserProfiles = async (expenses) => {
     try {
       const userIds = [...new Set(expenses.map(exp => exp.user_id).filter(Boolean))]
-      
+
       if (userIds.length === 0) return
 
       const { data: profiles, error } = await supabase
@@ -30,7 +30,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
       profiles?.forEach(profile => {
         profilesMap[profile.id] = profile
       })
-      
+
       setUserProfiles(profilesMap)
     } catch (error) {
       console.error('Error fetching user profiles:', error)
@@ -92,15 +92,15 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
     setLoading(true)
     try {
       let query = supabase.from('expenses').select('*')
-      
+
       if (currentGroup) {
         query = query.eq('group_id', currentGroup.id)
       } else {
         query = query.eq('user_id', user?.id).is('group_id', null)
       }
-      
+
       const { data, error } = await query.order('date', { ascending: false })
-      
+
       if (error) {
         console.error('Error fetching expenses:', error)
         setData([])
@@ -163,7 +163,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
     <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h2 className="text-base sm:text-lg font-medium">
-          📊 {currentGroup ? `${currentGroup.name} Group` : 'Personal'} Finance Sheet
+          {currentGroup ? `${currentGroup.name} Group` : 'Personal'} Finance Sheet
         </h2>
         <button
           onClick={fetchExpenses}
@@ -173,7 +173,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
           {loading ? '...' : '🔄 Refresh'}
         </button>
       </div>
-      
+
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-x-auto">
         <table className="w-full text-sm shadow-sm rounded-lg overflow-hidden">
@@ -209,23 +209,22 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
               </tr>
             )}
             {!loading && data.map((expense, index) => (
-              <tr key={expense.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-                index % 2 === 0 ? 'bg-white' : 'bg-gray-25'
-              }`}>
+              <tr key={expense.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'
+                }`}>
                 {editingId === expense.id ? (
                   <>
                     <td className="p-3">
                       <input
                         type="date"
                         value={editForm.date}
-                        onChange={(e) => setEditForm({...editForm, date: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       />
                     </td>
                     <td className="p-3">
                       <input
                         value={editForm.item || ''}
-                        onChange={(e) => setEditForm({...editForm, item: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, item: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                         placeholder="Item name"
                       />
@@ -233,7 +232,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                     <td className="p-3">
                       <input
                         value={editForm.category}
-                        onChange={(e) => setEditForm({...editForm, category: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       />
                     </td>
@@ -241,14 +240,14 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <input
                         type="number"
                         value={editForm.amount}
-                        onChange={(e) => setEditForm({...editForm, amount: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       />
                     </td>
                     <td className="p-3">
                       <input
                         value={editForm.remarks}
-                        onChange={(e) => setEditForm({...editForm, remarks: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                         placeholder="Add remarks"
                       />
@@ -256,14 +255,14 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                     <td className="p-3 text-gray-500">-</td>
                     <td className="p-3">
                       <div className="flex space-x-2">
-                        <button 
-                          onClick={handleSave} 
+                        <button
+                          onClick={handleSave}
                           className="px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium"
                         >
                           ✓ Save
                         </button>
-                        <button 
-                          onClick={() => setEditingId(null)} 
+                        <button
+                          onClick={() => setEditingId(null)}
                           className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
                         >
                           ✗ Cancel
@@ -277,7 +276,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <div className="text-sm">
                         <div className="font-medium text-gray-900">{new Date(expense.date).toLocaleDateString()}</div>
                         <div className="text-xs text-gray-500">
-                          {new Date(expense.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          {new Date(expense.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </td>
@@ -295,9 +294,8 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                           Amount needed
                         </span>
                       ) : (
-                        <span className={`text-sm font-bold ${
-                          expense.amount < 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
+                        <span className={`text-sm font-bold ${expense.amount < 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
                           Rs.{Math.abs(expense.amount)}
                           {expense.amount < 0 && (
                             <span className="ml-1 text-xs bg-green-100 text-green-700 px-1 py-0.5 rounded">Income</span>
@@ -309,7 +307,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <div className="text-sm text-gray-600 max-w-[150px]">
                         {expense.remarks ? (
                           <div className="relative group">
-                            <span 
+                            <span
                               className="block cursor-pointer"
                               onClick={() => {
                                 const newExpanded = new Set(expandedRemarks)
@@ -356,14 +354,14 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                     </td>
                     <td className="p-3">
                       <div className="flex space-x-2">
-                        <button 
-                          onClick={() => handleEdit(expense)} 
+                        <button
+                          onClick={() => handleEdit(expense)}
                           className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
                         >
                           ✏️ Edit
                         </button>
-                        <button 
-                          onClick={() => handleDelete(expense.id)} 
+                        <button
+                          onClick={() => handleDelete(expense.id)}
                           className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
                         >
                           🗑️ Delete
@@ -417,14 +415,14 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <input
                         type="date"
                         value={editForm.date}
-                        onChange={(e) => setEditForm({...editForm, date: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                         className="w-full px-1 py-1 border rounded text-xs"
                       />
                     </td>
                     <td className="p-2">
                       <input
                         value={editForm.item || ''}
-                        onChange={(e) => setEditForm({...editForm, item: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, item: e.target.value })}
                         className="w-full px-1 py-1 border rounded text-xs"
                         placeholder="Item"
                       />
@@ -432,7 +430,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                     <td className="p-2">
                       <input
                         value={editForm.category}
-                        onChange={(e) => setEditForm({...editForm, category: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                         className="w-full px-1 py-1 border rounded text-xs"
                       />
                     </td>
@@ -440,14 +438,14 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <input
                         type="number"
                         value={editForm.amount}
-                        onChange={(e) => setEditForm({...editForm, amount: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
                         className="w-full px-1 py-1 border rounded text-xs"
                       />
                     </td>
                     <td className="p-2">
                       <input
                         value={editForm.remarks}
-                        onChange={(e) => setEditForm({...editForm, remarks: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })}
                         className="w-full px-1 py-1 border rounded text-xs"
                         placeholder="Remarks"
                       />
@@ -466,7 +464,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <div className="text-xs">
                         <div className="font-medium">{new Date(expense.date).toLocaleDateString()}</div>
                         <div className="text-gray-500">
-                          {new Date(expense.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          {new Date(expense.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </td>
@@ -479,10 +477,9 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       </span>
                     </td>
                     <td className="p-2">
-                      <span className={`text-xs font-bold ${
-                        expense.amount === 0 ? 'text-red-500' : 
-                        expense.amount < 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                      <span className={`text-xs font-bold ${expense.amount === 0 ? 'text-red-500' :
+                          expense.amount < 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
                         {expense.amount === 0 ? 'Need amount' : `Rs.${Math.abs(expense.amount)}`}
                       </span>
                       {expense.amount < 0 && (
@@ -493,7 +490,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <div className="text-xs text-gray-600 max-w-[100px]">
                         {expense.remarks ? (
                           <div className="relative group">
-                            <span 
+                            <span
                               className="block cursor-pointer"
                               onClick={() => {
                                 const newExpanded = new Set(expandedRemarks)
@@ -540,14 +537,14 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                     </td>
                     <td className="p-2">
                       <div className="flex space-x-1">
-                        <button 
-                          onClick={() => handleEdit(expense)} 
+                        <button
+                          onClick={() => handleEdit(expense)}
                           className="text-blue-600 hover:bg-blue-100 p-1 rounded"
                         >
                           ✏️
                         </button>
-                        <button 
-                          onClick={() => handleDelete(expense.id)} 
+                        <button
+                          onClick={() => handleDelete(expense.id)}
                           className="text-red-600 hover:bg-red-100 p-1 rounded"
                         >
                           🗑️

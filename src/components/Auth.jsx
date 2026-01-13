@@ -13,6 +13,7 @@ export default function Auth({ onAuth }) {
   const [showVerification, setShowVerification] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
   const [resetOtp, setResetOtp] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -36,7 +37,7 @@ export default function Auth({ onAuth }) {
   const handleAuth = async (e) => {
     e.preventDefault()
     setLoading(true)
-    
+
     try {
       if (isSignUp) {
         if (password !== confirmPassword) {
@@ -117,7 +118,7 @@ export default function Auth({ onAuth }) {
     const demoUser = { id: 'demo', email: 'demo@local', user_metadata: { name: 'Demo User' } }
     try {
       localStorage.setItem('pfm_demo', '1')
-    } catch (e) {}
+    } catch (e) { }
     onAuth(demoUser)
     toast.success('Entered demo mode')
   }
@@ -190,28 +191,51 @@ export default function Auth({ onAuth }) {
           <h1 className="text-2xl font-bold mb-1">PFM</h1>
           <p className="text-sm text-gray-600">Personal Finance Manager</p>
         </div>
-        
+
         <div className="bg-white border border-gray-200 shadow-sm p-6">
           <h2 className="text-lg font-semibold mb-4">{isSignUp ? 'Create Account' : 'Sign In'}</h2>
-          
+
           <form onSubmit={handleAuth} className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" required />
             </div>
-            
+
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" required />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input-field pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
-            
+
             {isSignUp && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Confirm Password</label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" required />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="input-field pr-10"
+                    required
+                  />
+                </div>
               </div>
             )}
-            
+
             <button type="submit" disabled={loading} className="w-full btn-primary disabled:opacity-50">
               {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
             </button>
@@ -223,7 +247,7 @@ export default function Auth({ onAuth }) {
               <button onClick={() => setShowForgotPassword(true)} className="text-sm text-blue-600 hover:underline block w-full">Forgot password?</button>
             )}
           </div>
-          
+
           <div className="mt-4 text-center">
             <button onClick={() => setIsSignUp(!isSignUp)} className="text-sm text-gray-600 hover:text-black">
               {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
@@ -256,7 +280,7 @@ export default function Auth({ onAuth }) {
           <p className="text-sm text-gray-700 mb-4">
             {!otpSent ? 'Enter your email to receive an OTP' : 'Enter the OTP and your new password'}
           </p>
-          
+
           {!otpSent ? (
             <>
               <div className="mb-3">
@@ -296,6 +320,6 @@ export default function Auth({ onAuth }) {
         </div>
       </div>
     )}
-    </>
+  </>
   )
 }

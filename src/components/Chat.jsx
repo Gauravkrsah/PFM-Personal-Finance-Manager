@@ -1,22 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import axios from 'axios'
+import { Send } from 'lucide-react'
 import { supabase } from '../supabase'
 
 const getApiBaseUrl = () => {
   const isNgrok = window.location.hostname.includes('ngrok')
-  
+
   if (isNgrok && process.env.REACT_APP_BACKEND_NGROK_URL) {
     return process.env.REACT_APP_BACKEND_NGROK_URL
   }
-  
+
   if (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) {
     return window.APP_CONFIG.API_BASE_URL
   }
-  
+
   if (window.Capacitor && window.Capacitor.isNativePlatform()) {
     return 'http://localhost:8000'
   }
-  
+
   return 'http://localhost:8000'
 }
 
@@ -29,6 +30,7 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
     } catch { return [] }
   })
   const [expensesData, setExpensesData] = useState([])
+  const [pendingTransactions, setPendingTransactions] = useState(null) // For confirmation flow
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
@@ -51,9 +53,9 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
       } else {
         query = query.eq('user_id', user.id).is('group_id', null)
       }
-      const { data, error } = await query.order('created_at', { ascending: false }).limit(50)
+      const { data, error } = await query.order('created_at', { ascending: false }).limit(1000)
       if (!error) setExpensesData(data || [])
-    } catch (err) {}
+    } catch (err) { }
   }, [user, currentGroup])
 
   useEffect(() => {
@@ -78,21 +80,35 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
 
     try {
       const intent = detectIntent(userMsg)
-      
+
       if (intent === 'expense') {
         const response = await axios.post(`${getApiBaseUrl()}/api/expenses/parse`, { text: userMsg })
         const { expenses, reply } = response.data
         setMessages(prev => [...prev, { type: 'bot', text: reply }])
-        
+
         if (expenses && expenses.length > 0) {
-          await onExpenseAdded(expenses)
-          setMessages(prev => [...prev, { type: 'bot', text: '✓ Saved' }])
+          // Check if any transaction has ambiguous category ("Other")
+          const hasAmbiguous = expenses.some(exp => exp.category === 'Other')
+
+          if (hasAmbiguous) {
+            // Store pending transactions and ask for confirmation
+            setPendingTransactions(expenses)
+            setMessages(prev => [...prev, {
+              type: 'confirmation',
+              text: `I'm not sure where to save this. Please choose:`,
+              expenses: expenses
+            }])
+          } else {
+            // Auto-save if confident
+            await onExpenseAdded(expenses)
+            setMessages(prev => [...prev, { type: 'bot', text: '✓ Saved' }])
+          }
         }
       } else {
         const { data: { user: freshUser } } = await supabase.auth.getUser()
         const currentUser = freshUser || user
         const userName = currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'User'
-        
+
         const payload = {
           text: userMsg,
           user_id: currentUser?.id,
@@ -122,9 +138,75 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
     localStorage.removeItem('pfm_messages')
   }
 
+  // Handle confirmation - save to chosen category
+  const handleConfirmSave = async (category) => {
+    if (!pendingTransactions) return
+
+    try {
+      // Override category for all pending transactions
+      const updatedExpenses = pendingTransactions.map(exp => ({
+        ...exp,
+        category: category
+      }))
+
+      await onExpenseAdded(updatedExpenses)
+      setMessages(prev => [...prev, { type: 'bot', text: `✓ Saved to ${category}` }])
+      setPendingTransactions(null)
+    } catch (error) {
+      setMessages(prev => [...prev, { type: 'bot', text: 'Error saving transaction' }])
+    }
+  }
+
+  // Handle confirmation with specific type (for person-based transactions)
+  const handleConfirmSaveWithType = async (category, itemType, amount) => {
+    if (!pendingTransactions) return
+
+    try {
+      const exp = pendingTransactions[0]
+
+      // Determine label and remarks based on type
+      let typeLabel, remarks
+      if (itemType === 'received from') {
+        typeLabel = 'RECEIVED'
+        remarks = `Received from ${exp.paid_by}`
+      } else if (itemType === 'lent to') {
+        typeLabel = 'LENT'
+        remarks = `Lent to ${exp.paid_by}`
+      } else if (itemType === 'borrowed from') {
+        typeLabel = 'BORROWED'
+        remarks = `Borrowed from ${exp.paid_by}`
+      } else if (itemType === 'paid to') {
+        typeLabel = 'PAID'
+        remarks = `Paid to ${exp.paid_by}`
+      } else {
+        typeLabel = itemType.toUpperCase()
+        remarks = `${itemType} ${exp.paid_by}`
+      }
+
+      const updatedExpense = {
+        ...exp,
+        category: category,
+        item: itemType,
+        amount: amount,
+        remarks: remarks
+      }
+
+      await onExpenseAdded([updatedExpense])
+      setMessages(prev => [...prev, { type: 'bot', text: `✓ Saved as ${typeLabel} (${exp.paid_by})` }])
+      setPendingTransactions(null)
+    } catch (error) {
+      setMessages(prev => [...prev, { type: 'bot', text: 'Error saving transaction' }])
+    }
+  }
+
+  const handleCancelPending = () => {
+    setPendingTransactions(null)
+    setMessages(prev => [...prev, { type: 'bot', text: '✗ Cancelled' }])
+  }
+
   return (
     <div className="flex flex-col h-full" style={{ display: isVisible ? 'flex' : 'none' }}>
-      <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-4 pb-48 lg:pb-32">
+      <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-4 pb-48 lg:pb-48">
         <div className="max-w-4xl mx-auto space-y-3">
           {messages.length === 0 && (
             <div className="flex items-center justify-center min-h-[50vh] text-center text-gray-400">
@@ -137,9 +219,121 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
           )}
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] lg:max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${msg.type === 'user' ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}`}>
-                {msg.text}
-              </div>
+              {msg.type === 'confirmation' ? (
+                <div className="max-w-[90%] lg:max-w-[80%] bg-amber-50 border border-amber-200 px-4 py-3 rounded-2xl">
+                  <p className="text-sm text-amber-800 mb-3">{msg.text}</p>
+                  {msg.expenses && msg.expenses.map((exp, j) => (
+                    <p key={j} className="text-sm font-medium text-gray-700 mb-2">
+                      Rs.{Math.abs(exp.amount).toLocaleString()} → {exp.remarks || exp.item}
+                    </p>
+                  ))}
+                  <div className="flex flex-col gap-2 mt-3">
+                    {/* Check if there's a person name in paid_by */}
+                    {msg.expenses && msg.expenses[0]?.paid_by ? (
+                      <>
+                        <p className="text-xs text-gray-500 mb-1">What type of transaction?</p>
+                        <div className="flex flex-wrap gap-2">
+                          {/* Check item/remarks for direction hint */}
+                          {(() => {
+                            const exp = msg.expenses[0]
+                            const item = (exp.item || '').toLowerCase()
+                            const remarks = (exp.remarks || '').toLowerCase()
+
+                            // Check for direction hints
+                            const isGaveOrTo = item.includes('i gave') || item.includes('to person') || remarks.includes('i gave')
+                            const isFrom = item.includes('from') || remarks.includes(' from ')
+
+                            // If "I gave" or "to person" - show LENT and PAID (money going out)
+                            if (isGaveOrTo && !isFrom) {
+                              return (
+                                <>
+                                  <button onClick={() => handleConfirmSaveWithType('Loan', 'lent to', Math.abs(exp.amount))}
+                                    className="px-3 py-2 text-xs font-medium bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors">
+                                    I lent to {exp.paid_by} → <span className="font-bold">LENT</span>
+                                  </button>
+                                  <button onClick={() => handleConfirmSaveWithType('Loan', 'paid to', Math.abs(exp.amount))}
+                                    className="px-3 py-2 text-xs font-medium bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 transition-colors">
+                                    I paid back {exp.paid_by} → <span className="font-bold">PAID</span>
+                                  </button>
+                                </>
+                              )
+                            }
+
+                            // If "from person" - show RECEIVED and BORROWED (money coming in)
+                            if (isFrom) {
+                              return (
+                                <>
+                                  <button onClick={() => handleConfirmSaveWithType('Loan', 'received from', -Math.abs(exp.amount))}
+                                    className="px-3 py-2 text-xs font-medium bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors">
+                                    {exp.paid_by} paid back → <span className="font-bold">RECEIVED</span>
+                                  </button>
+                                  <button onClick={() => handleConfirmSaveWithType('Loan', 'borrowed from', -Math.abs(exp.amount))}
+                                    className="px-3 py-2 text-xs font-medium bg-orange-100 text-orange-700 rounded-xl hover:bg-orange-200 transition-colors">
+                                    I borrowed from {exp.paid_by} → <span className="font-bold">BORROWED</span>
+                                  </button>
+                                </>
+                              )
+                            }
+
+                            // Otherwise show all 4 options
+                            return (
+                              <>
+                                <button onClick={() => handleConfirmSaveWithType('Loan', 'received from', -Math.abs(exp.amount))}
+                                  className="px-3 py-2 text-xs font-medium bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors">
+                                  {exp.paid_by} paid back → <span className="font-bold">RECEIVED</span>
+                                </button>
+                                <button onClick={() => handleConfirmSaveWithType('Loan', 'lent to', Math.abs(exp.amount))}
+                                  className="px-3 py-2 text-xs font-medium bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors">
+                                  I gave to {exp.paid_by} → <span className="font-bold">LENT</span>
+                                </button>
+                                <button onClick={() => handleConfirmSaveWithType('Loan', 'borrowed from', -Math.abs(exp.amount))}
+                                  className="px-3 py-2 text-xs font-medium bg-orange-100 text-orange-700 rounded-xl hover:bg-orange-200 transition-colors">
+                                  I took from {exp.paid_by} → <span className="font-bold">BORROWED</span>
+                                </button>
+                                <button onClick={() => handleConfirmSaveWithType('Loan', 'paid to', Math.abs(exp.amount))}
+                                  className="px-3 py-2 text-xs font-medium bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 transition-colors">
+                                  I paid back {exp.paid_by} → <span className="font-bold">PAID</span>
+                                </button>
+                              </>
+                            )
+                          })()}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => handleConfirmSave('Food')}
+                          className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition-colors"
+                        >
+                          Expense
+                        </button>
+                        <button
+                          onClick={() => handleConfirmSave('Loan')}
+                          className="px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
+                        >
+                          Loan
+                        </button>
+                        <button
+                          onClick={() => handleConfirmSave('Income')}
+                          className="px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+                        >
+                          Income
+                        </button>
+                      </div>
+                    )}
+                    <button
+                      onClick={handleCancelPending}
+                      className="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors self-start"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={`max-w-[80%] lg:max-w-[70%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${msg.type === 'user' ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}`}>
+                  {msg.text}
+                </div>
+              )}
             </div>
           ))}
           {loading && (
@@ -152,19 +346,27 @@ export default function Chat({ onExpenseAdded, onTableRefresh, user, currentGrou
       </div>
 
       <div className="fixed bottom-14 lg:bottom-0 left-0 right-0 lg:left-56 z-30">
-        <div className="absolute inset-x-0 bottom-full h-16 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-        <div className="bg-white px-4 lg:px-8 py-4">
-          <form onSubmit={handleSubmit} className="flex gap-2 max-w-4xl mx-auto">
-            <input 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)} 
-              placeholder="Add expense or ask question..." 
-              className="flex-1 px-5 py-3 text-sm border border-gray-300 rounded-full focus:border-black focus:outline-none focus:shadow-sm transition-all" 
+        <div className="absolute inset-x-0 bottom-full h-16 bg-gradient-to-t from-paper-50 to-transparent pointer-events-none" />
+        <div className="bg-paper-50/80 backdrop-blur-xl px-4 lg:px-8 py-4 lg:pb-10 lg:pt-6">
+          <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto flex items-center">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Add expense or ask question..."
+              className="w-full px-5 py-3 pr-12 text-sm border border-gray-300 rounded-full focus:border-black focus:outline-none focus:shadow-sm transition-all"
               disabled={loading}
               autoFocus
             />
-            <button type="submit" disabled={loading || !input.trim()} className="w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center text-lg flex-shrink-0">
-              {loading ? '...' : '↑'}
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="absolute right-2 p-2 text-black hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Send size={20} />
+              )}
             </button>
           </form>
         </div>
