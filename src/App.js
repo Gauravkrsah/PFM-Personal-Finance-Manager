@@ -169,26 +169,19 @@ function App() {
         currentGroup={currentGroup}
       >
         {activeTab === 'chat' && (
-          <div className="flex flex-col h-full">
-            <div className="flex-shrink-0 bg-white/50 dark:bg-paper-100/50 backdrop-blur-xl border-b border-paper-200 dark:border-paper-300/50 px-4 py-2 lg:px-8 z-10 sticky top-0">
-              <div className="max-w-4xl mx-auto">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <GroupManager
-                      user={user}
-                      currentGroup={currentGroup}
-                      onGroupChange={setCurrentGroup}
-                      onClearChat={() => {
-                        localStorage.removeItem('pfm_messages')
-                        setChatKey(k => k + 1)
-                      }}
-                    />
-                  </div>
-
-                </div>
-              </div>
+          <div className="flex flex-col h-full relative">
+            <div className="flex-shrink-0 p-4 lg:p-8 lg:pt-8 max-w-7xl mx-auto w-full">
+              <GroupManager
+                user={user}
+                currentGroup={currentGroup}
+                onGroupChange={setCurrentGroup}
+                onClearChat={() => {
+                  localStorage.removeItem('pfm_messages')
+                  setChatKey(k => k + 1)
+                }}
+              />
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden w-full">
               <Chat key={chatKey} onExpenseAdded={handleExpenseAdded} onTableRefresh={handleTableRefresh} user={user} currentGroup={currentGroup} isVisible={true} />
             </div>
           </div>

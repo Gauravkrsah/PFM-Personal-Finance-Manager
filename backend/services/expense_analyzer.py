@@ -113,6 +113,9 @@ class ExpenseAnalyzer:
 
     def find_specific_item(self, query: str, expenses_data: List[Dict]) -> Dict[str, Any]:
         """Find specific item expenses from the data"""
+        if not query:
+            return None
+            
         query_lower = query.lower()
         
         # Extract potential item names from query
@@ -121,30 +124,38 @@ class ExpenseAnalyzer:
         
         # Words that indicate aggregate queries, not specific items
         aggregate_keywords = ['total', 'all', 'everything', 'overall', 'sum', 'entire', 'whole', 'complete']
+        # Comprehensive stop words that should never be item keywords
+        stop_words = ['i', 'my', 'how', 'much', 'spend', 'spent', 'on', 'for', 'the', 'a', 'an', 
+                     'did', 'do', 'have', 'has', 'what', 'is', 'are', 'was', 'were', 'money', 
+                     'expenses', 'expense', 'to', 'from', 'with', 'at', 'in', 'of', 'and', 'or',
+                     'this', 'that', 'it', 'me', 'you', 'we', 'they', 'he', 'she', 'am', 'be']
         
-        # Look for "on [item]" or "for [item]" patterns
+        # Look for "on [item]" or "for [item]" patterns - ONLY use 'on' and 'for' as triggers
         for i, word in enumerate(words):
-            if word in ['on', 'for', 'spend', 'spent'] and i + 1 < len(words):
+            if word in ['on', 'for'] and i + 1 < len(words):
                 next_word = words[i + 1]
-                # Skip if next word is an aggregate keyword
-                if next_word not in aggregate_keywords:
+                # Skip if next word is an aggregate keyword, stop word, or too short
+                if (next_word not in aggregate_keywords and 
+                    next_word not in stop_words and 
+                    len(next_word) > 2):
                     item_keywords.append(next_word)
         
         # Also check for direct item mentions
-        common_items = ['momo', 'biryani', 'tea', 'coffee', 'lunch', 'dinner', 'grocery', 'petrol', 'taxi', 'rent', 'chicken', 'lassi', 'dahi', 'ghee', 'chiya']
+        common_items = ['momo', 'biryani', 'tea', 'coffee', 'lunch', 'dinner', 'grocery', 'petrol', 'taxi', 'rent', 'chicken', 'lassi', 'dahi', 'ghee', 'chiya', 'rice', 'soap', 'water']
         for item in common_items:
-            if item in query_lower:
+            if item in query_lower and item not in item_keywords:
                 item_keywords.append(item)
         
         if not item_keywords:
             # Fallback: Check if the query itself matches any item in expenses_data (for single word/short queries)
             clean_query = query_lower.strip()
             # Ignore if query is just a stop word or too short
-            if len(clean_query) > 2 and clean_query not in ['expense', 'expenses', 'spending', 'money']:
+            if len(clean_query) > 2 and clean_query not in stop_words:
                 for expense in expenses_data:
                     # Check for exact match or strong partial match (word boundary)
-                    item = expense.get('item', '').lower()
-                    if clean_query == item or f" {clean_query} " in f" {item} " or item.startswith(f"{clean_query} ") or item.endswith(f" {clean_query}"):
+                    item = expense.get('item') or ''
+                    item_lower = item.lower()
+                    if clean_query == item_lower or f" {clean_query} " in f" {item_lower} " or item_lower.startswith(f"{clean_query} ") or item_lower.endswith(f" {clean_query}"):
                         item_keywords.append(clean_query)
                         break
             
@@ -156,12 +167,12 @@ class ExpenseAnalyzer:
         total_amount = 0
         
         for expense in expenses_data:
-            item_name = expense.get('item', '').lower()
-            remarks = expense.get('remarks', '').lower()
+            item_name = expense.get('item') or ''
+            remarks = expense.get('remarks') or ''
             
             # Check if any keyword matches item or remarks
             for keyword in item_keywords:
-                if keyword in item_name or keyword in remarks:
+                if keyword in item_name.lower() or keyword in remarks.lower():
                     matching_expenses.append(expense)
                     total_amount += expense.get('amount', 0)
                     break
@@ -297,6 +308,23 @@ class ExpenseAnalyzer:
             time_context = f" in {period_name}"
         else:
             time_context = ""
+        
+        # ITEM-SPECIFIC QUERIES - Check these FIRST before category matching
+        # This ensures "tea" matches the tea item, not the food category that contains "tea" as a keyword
+        if expenses_data:
+            item_result = self.find_specific_item(query_lower, expenses_data)
+            if item_result:
+                item_name = item_result['item_name'].title()
+                total = item_result['total_amount']
+                count = item_result['count']
+                
+                if count == 1:
+                    expense = item_result['expenses'][0]
+                    date_info = f" on {expense.get('date', 'unknown date')}" if expense.get('date') else ""
+                    paid_by = f" (paid by {expense.get('paid_by')})" if expense.get('paid_by') else ""
+                    return f"You spent Rs.{total} on {item_name}{date_info}{paid_by}{time_context}."
+                else:
+                    return f"You spent Rs.{total} on {item_name} across {count} transactions{time_context}."
         
         # Check for multiple categories in query (e.g., "food and grocery")
         matched_categories = []
@@ -469,25 +497,6 @@ class ExpenseAnalyzer:
             parts.append(f"Net Position: Rs.{abs(net_loan)} ({'You are owed' if net_loan >= 0 else 'You owe'})")
             
             return f"Loan Update{time_context}: " + "; ".join(parts) + "."
-
-        # Specific item queries
-        # Try to find specific item matches first
-        if expenses_data:
-            item_result = self.find_specific_item(query_lower, expenses_data)
-            # Only use if we found a result AND (keywords match OR we have a direct item match)
-            # We skip this if the query clearly looks like a category query (handled later) unless it's a specific item name
-            if item_result:
-                item_name = item_result['item_name'].title()
-                total = item_result['total_amount']
-                count = item_result['count']
-                
-                if count == 1:
-                    expense = item_result['expenses'][0]
-                    date_info = f" on {expense.get('date', 'unknown date')}" if expense.get('date') else ""
-                    paid_by = f" (paid by {expense.get('paid_by')})" if expense.get('paid_by') else ""
-                    return f"You spent Rs.{total} on {item_name}{date_info}{paid_by}{time_context}."
-                else:
-                    return f"You spent Rs.{total} on {item_name} across {count} transactions{time_context}."
 
         # Total/Summary queries
         if any(word in query_lower for word in ['total', 'all', 'overall', 'everything', 'entire', 'whole']):

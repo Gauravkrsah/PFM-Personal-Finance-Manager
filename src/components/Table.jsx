@@ -302,7 +302,7 @@ const Table = forwardRef(({ expenses, onExpenseUpdate, currentGroup, user }, ref
                       <td className="p-4 text-gray-600 dark:text-gray-300 text-sm whitespace-nowrap">{new Date(expense.date).toLocaleDateString()}</td>
                       <td className="p-4 font-medium text-gray-900 dark:text-gray-100 text-sm">{expense.item}</td>
                       <td className="p-4">
-                        <span className="px-3 py-1 bg-paper-100 dark:bg-paper-300 text-gray-700 dark:text-gray-200 rounded-full text-xs font-medium border border-paper-200 dark:border-paper-400/50">
+                        <span className="px-3 py-1 bg-paper-100 dark:bg-paper-300 text-gray-700 dark:text-gray-200 rounded-full text-xs font-medium border border-paper-200 dark:border-paper-400/50 whitespace-nowrap">
                           {expense.category}
                         </span>
                       </td>

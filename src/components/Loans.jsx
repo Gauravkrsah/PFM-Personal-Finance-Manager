@@ -187,23 +187,23 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
         </div>
 
         <div className={`p-3 md:p-4 rounded-xl border shadow-sm relative overflow-hidden min-w-[170px] md:min-w-0 flex-shrink-0 md:flex-shrink ${netLoan >= 0
-            ? 'bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 dark:from-green-900/20 dark:to-emerald-900/30 dark:border-green-800/50'
-            : 'bg-gradient-to-br from-red-50 to-orange-100 border-red-200 dark:from-red-900/20 dark:to-orange-900/30 dark:border-red-800/50'
+          ? 'bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 dark:from-green-900/20 dark:to-emerald-900/30 dark:border-green-800/50'
+          : 'bg-gradient-to-br from-red-50 to-orange-100 border-red-200 dark:from-red-900/20 dark:to-orange-900/30 dark:border-red-800/50'
           }`}>
           <div className="relative z-10">
             <div className={`text-[10px] md:text-xs font-semibold uppercase tracking-wide mb-1 ${netLoan >= 0
-                ? 'text-green-800 dark:text-green-300'
-                : 'text-red-800 dark:text-red-300'
+              ? 'text-green-800 dark:text-green-300'
+              : 'text-red-800 dark:text-red-300'
               }`}>Net Position</div>
             <div className={`text-lg md:text-2xl font-bold ${netLoan >= 0
-                ? 'text-green-900 dark:text-green-100'
-                : 'text-red-900 dark:text-red-100'
+              ? 'text-green-900 dark:text-green-100'
+              : 'text-red-900 dark:text-red-100'
               }`}>
               Rs.{Math.abs(netLoan).toLocaleString()}
             </div>
             <div className={`text-[10px] md:text-xs font-medium mt-1 ${netLoan >= 0
-                ? 'text-green-700 dark:text-green-400'
-                : 'text-red-700 dark:text-red-400'
+              ? 'text-green-700 dark:text-green-400'
+              : 'text-red-700 dark:text-red-400'
               }`}>
               {netLoan >= 0 ? '✨ Others owe you' : '⚠️ You owe'}
             </div>
@@ -221,21 +221,26 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
             placeholder="Search loans..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border-none rounded-2xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 text-ink-900"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-white dark:bg-paper-200 border border-gray-300 dark:border-paper-300 rounded-lg focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 text-ink-900"
           />
-          <svg className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-400 absolute left-3.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="px-4 py-2.5 text-sm bg-paper-50 dark:bg-paper-200 border-none rounded-2xl focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none font-medium text-gray-700 dark:text-gray-200 sm:w-40"
-        >
-          <option value="all">All Loans</option>
-          <option value="given">Loans Given</option>
-          <option value="received">Loans Taken</option>
-        </select>
+        <div className="relative sm:w-48">
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="w-full pl-4 pr-10 py-2 text-sm bg-white dark:bg-paper-200 border border-gray-300 dark:border-paper-300 rounded-lg focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none font-medium text-gray-700 dark:text-gray-200 appearance-none cursor-pointer hover:border-gray-400 dark:hover:border-gray-400 transition-colors"
+          >
+            <option value="all">All Loans</option>
+            <option value="given">Loans Given</option>
+            <option value="received">Loans Taken</option>
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          </div>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-paper-100 dark:border-paper-300/50">
@@ -278,22 +283,45 @@ const Loans = forwardRef(({ currentGroup, user }, ref) => {
                 <td className="p-4">
                   {(() => {
                     const item = (loan.item || '').toLowerCase()
+                    const remarks = (loan.remarks || '').toLowerCase()
                     let type = 'LOAN'
                     let bgClass = 'bg-gray-100 text-gray-700 border border-gray-200'
 
-                    if (item.includes('lent') || item.includes('gave') || item.includes('loan given')) {
-                      type = 'LENT'
-                      bgClass = 'bg-green-100 text-green-700 border border-green-200'
-                    } else if (item.includes('borrowed') || item.includes('loan taken') || item.includes('took')) {
-                      type = 'BORROWED'
-                      bgClass = 'bg-orange-100 text-orange-700 border border-orange-200'
-                    } else if (item.includes('received') || item.includes('repayment') || item.includes('got')) {
-                      type = 'RECEIVED'
-                      bgClass = 'bg-blue-100 text-blue-700 border border-blue-200'
-                    } else if (item.includes('paid')) {
+                    // PAID: I'm repaying a loan I borrowed (money going out, positive amount)
+                    // Check 'loan repayment' or 'repaid' in item/remarks first
+                    if (item.includes('loan repayment') || item.includes('repaid') ||
+                      remarks.includes('paid back loan') || remarks.includes('repaid loan')) {
                       type = 'PAID'
                       bgClass = 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/30'
-                    } else if (loan.amount > 0) {
+                    }
+                    // RECEIVED: Someone paid me back for a loan I gave them (money coming in, negative amount)
+                    else if (item.includes('loan received back') || item.includes('received back') ||
+                      remarks.includes('paid back their loan') || remarks.includes('got loan back')) {
+                      type = 'RECEIVED'
+                      bgClass = 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/30'
+                    }
+                    // LENT: I gave a loan to someone (money went out, positive amount)
+                    else if (item.includes('lent') || item.includes('gave') || item.includes('loan given')) {
+                      type = 'LENT'
+                      bgClass = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800/30'
+                    }
+                    // BORROWED: I borrowed from someone (money came in, negative amount)
+                    else if (item.includes('borrowed') || item.includes('loan taken') || item.includes('took') || item.includes('loan from')) {
+                      type = 'BORROWED'
+                      bgClass = 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/30'
+                    }
+                    // Generic received/got patterns (someone paying back)
+                    else if (item.includes('received') || item.includes('got')) {
+                      type = 'RECEIVED'
+                      bgClass = 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/30'
+                    }
+                    // Generic paid patterns (I'm paying)
+                    else if (item.includes('paid')) {
+                      type = 'PAID'
+                      bgClass = 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/30'
+                    }
+                    // Fallback based on amount sign
+                    else if (loan.amount > 0) {
                       type = 'LENT'
                       bgClass = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800/30'
                     } else {

@@ -7,7 +7,7 @@ import ThemeToggle from '../ThemeToggle'
 
 export default function MainLayout({ children, activeTab, setActiveTab, user, onLogout, currentGroup }) {
     return (
-        <div className="min-h-screen bg-paper-50">
+        <div className="fixed inset-0 overflow-hidden bg-paper-50">
             {/* Sidebar - Desktop */}
             <Sidebar
                 activeTab={activeTab}
@@ -18,7 +18,7 @@ export default function MainLayout({ children, activeTab, setActiveTab, user, on
             />
 
             {/* Main Content */}
-            <main className="lg:ml-64 h-screen flex flex-col">
+            <main className="lg:ml-64 h-full flex flex-col">
                 {/* Mobile Header */}
                 <div className="lg:hidden flex-shrink-0 bg-white/80 dark:bg-paper-100/80 backdrop-blur-xl border-b border-paper-200 dark:border-paper-300/50 px-4 py-3 z-20 sticky top-0">
                     <div className="flex items-center justify-between">

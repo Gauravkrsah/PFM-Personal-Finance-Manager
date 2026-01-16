@@ -100,6 +100,8 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    height: 100%;
+    overflow: hidden;
   }
 
   body {
@@ -110,7 +112,8 @@
     /* Use variables now */
     @apply bg-paper-50 text-ink-900 transition-colors duration-300;
     font-weight: 500;
-    min-height: 100vh;
+    height: 100%;
+    overflow: hidden;
   }
 
   h1,

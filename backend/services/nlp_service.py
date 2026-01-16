@@ -16,17 +16,60 @@ load_dotenv()
 class ExpenseParser:
     def __init__(self):
         self.categories = {
-            'food': ['biryani', 'pizza', 'restaurant', 'meal', 'lunch', 'dinner', 'food', 'eat', 'cafe', 'snack', 'tea', 'coffee', 'breakfast', 'momo', 'momos', 'noodles', 'chowmein', 'chowmin', 'chow', 'ramen', 'pasta', 'rice', 'dal', 'curry', 'khana', 'khaana', 'chiya', 'chai', 'dudh', 'milk', 'bhat', 'daal', 'tarkari', 'sabji', 'machha', 'fish', 'chicken', 'mutton', 'buff', 'pork', 'egg', 'anda', 'roti', 'chapati', 'paratha', 'samosa', 'pakoda', 'chaat', 'lassi', 'lasi', 'juice', 'paani', 'water', 'drink', 'beverage'],
-            'transport': ['petrol', 'fuel', 'taxi', 'uber', 'bus', 'train', 'auto', 'rickshaw', 'metro', 'flight', 'travel', 'tempo', 'microbus', 'bike', 'scooter', 'car', 'gaadi'],
-            'groceries': ['grocery', 'groceries', 'vegetables', 'fruits', 'market', 'supermarket', 'store', 'milk', 'bread', 'apple', 'garlic', 'potato', 'onion', 'tomato', 'sabji', 'tarkari', 'fruits', 'phal', 'alu', 'pyaj', 'lasun', 'dhaniya', 'hariyo', 'green'],
-            'shopping': ['clothes', 'shoes', 'shopping', 'shirt', 'dress', 'bag', 'accessories', 'kapada', 'jutta', 'chappals', 'sandals'],
-            'utilities': ['electricity', 'water', 'internet', 'phone', 'mobile', 'wifi', 'bill', 'current', 'paani', 'net', 'recharge'],
-            'entertainment': ['movie', 'game', 'party', 'cinema', 'show', 'concert', 'film', 'picture', 'khel'],
+            'food': ['biryani', 'pizza', 'restaurant', 'meal', 'lunch', 'dinner', 'food', 'cafe', 'snack', 'tea', 'coffee', 'breakfast', 'momo', 'momos', 'noodles', 'chowmein', 'chowmin', 'chow', 'ramen', 'pasta', 'rice', 'dal', 'curry', 'khana', 'khaana', 'chiya', 'chai', 'dudh', 'milk', 'bhat', 'daal', 'tarkari', 'sabji', 'machha', 'fish', 'chicken', 'mutton', 'buff', 'pork', 'egg', 'anda', 'roti', 'chapati', 'paratha', 'samosa', 'pakoda', 'chaat', 'lassi', 'lasi', 'juice', 'paani', 'water', 'drink', 'beverage', 'ice cream', 'dessert', 'sweets', 'mithai', 'masala', 'paneer', 'veg', 'non-veg', 'burger', 'sandwich', 'roll', 'wrap', 'kathi', 'tikka', 'kebab', 'tandoori'],
+            'transport': ['petrol', 'fuel', 'taxi', 'uber', 'bus', 'train', 'auto', 'rickshaw', 'metro', 'flight', 'travel', 'tempo', 'microbus', 'bike', 'scooter', 'car', 'gaadi', 'diesel', 'parking', 'garage', 'toll', 'service', 'repair', 'ac', 'cooler', 'pump', 'motor'],
+            'groceries': ['grocery', 'groceries', 'vegetables', 'fruits', 'market', 'supermarket', 'store', 'milk', 'bread', 'apple', 'garlic', 'potato', 'onion', 'tomato', 'sabji', 'tarkari', 'fruits', 'phal', 'alu', 'pyaj', 'lasun', 'dhaniya', 'hariyo', 'green', 'oil', 'salt', 'sugar', 'spices', 'shampoo', 'soap', 'detergent', 'paste', 'brush', 'oil', 'cream', 'powder', 'tissue', 'paper', 'napkin', 'sanitizer', 'bucket', 'mug', 'mop', 'broom'],
+            'shopping': ['clothes', 'shoes', 'shopping', 'shirt', 'dress', 'bag', 'accessories', 'kapada', 'jutta', 'chappals', 'sandals', 'pant', 'jeans', 'tshirt', 'jacket', 'watch', 'belt', 'perfume', 'deo', 'makeup', 'lipstick', 'liner', 'mascara', 'polish', 'remover', 'gift', 'present'],
+            'utilities': ['electricity', 'water', 'internet', 'phone', 'mobile', 'wifi', 'bill', 'current', 'paani', 'net', 'recharge', 'tv', 'dish', 'gas', 'waste', 'broadband', 'cable', 'wire', 'switch', 'socket', 'bulb', 'light', 'battery', 'inverter', 'topup', 'data', 'plan', 'subscription'],
+            'electronics': ['heater', 'fan', 'fridge', 'microwave', 'oven', 'stove', 'chimney', 'charger', 'remote', 'speaker', 'headphone', 'earphone', 'laptop', 'tablet', 'radio', 'iron', 'geyser', 'blender', 'mixer', 'toaster', 'kettle', 'purifier', 'filter', 'vacuum', 'cleaner', 'machine'],
+            'medical': ['medicine', 'pill', 'tablet', 'syrup', 'drop', 'injection', 'bandage', 'plaster', 'test', 'scan', 'xray', 'doctor', 'nurse', 'fees', 'mask', 'glove', 'hospital', 'clinic', 'pharmacy', 'medical', 'health'],
+            'entertainment': ['movie', 'game', 'party', 'cinema', 'show', 'concert', 'film', 'picture', 'khel', 'outing', 'club', 'pub', 'netflix', 'spotify'],
             'accommodation': ['hotel', 'stay', 'booking', 'resort', 'lodge', 'guest house', 'airbnb'],
             'rent': ['rent', 'house', 'apartment', 'room', 'ghar', 'kotha', 'bhada'],
             'loan': ['loan', 'lend', 'lent', 'borrow', 'borrowed', 'debt', 'rin', 'gave', 'diye', 'liye', 'udhar', 'qarz', 'paid back', 'repaid'],
-            'income': ['salary', 'bonus', 'incentive', 'refund', 'income', 'earning'],
-            'education': ['admission', 'fee', 'tuition', 'school', 'college', 'university', 'course', 'class', 'book', 'study', 'education', 'exam', 'test']
+            'income': ['salary', 'bonus', 'incentive', 'refund', 'income', 'earning', 'dividend', 'profit'],
+            'education': ['admission', 'fee', 'tuition', 'school', 'college', 'university', 'course', 'class', 'book', 'study', 'education', 'exam', 'test', 'stationary', 'pen', 'pencil', 'notebook']
+        }
+        
+        # Build keyword set for person detection
+        self.all_keywords = set()
+        for kws in self.categories.values():
+            for kw in kws:
+                self.all_keywords.add(kw.lower())
+                # Add individual words from multi-word keywords
+                if ' ' in kw:
+                    for part in kw.split():
+                        if len(part) > 2:
+                            self.all_keywords.add(part.lower())
+        
+        # Additional non-person words that might appear in descriptions
+        self.non_person_words = {
+            'blue', 'red', 'green', 'black', 'white', 'small', 'large', 'big', 'new', 'old',
+            'purchased', 'bought', 'spent', 'payment', 'paid', 'cost', 'price', 'total',
+            'kg', 'gm', 'ltr', 'ml', 'unit', 'piece', 'set', 'pack', 'bottle', 'can',
+            'with', 'and', 'from', 'for', 'the', 'this', 'that', 'at', 'to', 'of',
+            'airport', 'office', 'home', 'work', 'shop', 'store', 'market', 'mall', 'gym',
+            'bank', 'school', 'college', 'hospital', 'pharmacy', 'clinic', 'dentist',
+            'had', 'took', 'got', 'ate', 'eaten', 'drank', 'drunk', 'bought', 'buy', 'ordered',
+            # Appliances & Electronics
+            'heater', 'fan', 'ac', 'cooler', 'fridge', 'microwave', 'oven', 'stove', 'chimney',
+            'inverter', 'battery', 'bulb', 'light', 'switch', 'socket', 'wire', 'cable',
+            'charger', 'remote', 'speaker', 'headphone', 'earphone', 'laptop', 'mobile',
+            'phone', 'tablet', 'tv', 'radio', 'iron', 'geyser', 'pump', 'motor', 'machine',
+            'blender', 'mixer', 'toaster', 'kettle', 'purifier', 'filter', 'vacuum', 'cleaner',
+            # Household & Containers
+            'mop', 'broom', 'bucket', 'mug', 'tap', 'sink', 'basin', 'shower', 'tub', 'towel',
+            'jar', 'box', 'bag', 'case', 'container', 'tin', 'tray', 'plate', 'bowl', 'cup', 'glass',
+            'soap', 'shampoo', 'paste', 'brush', 'comb', 'oil', 'cream', 'powder', 'perfume',
+            'deo', 'makeup', 'lipstick', 'liner', 'mascara', 'polish', 'remover', 'cotton',
+            'tissue', 'paper', 'napkin', 'diaper', 'pad', 'sanitizer', 'mask', 'glove',
+            # Medical & Professional
+            'medicine', 'pill', 'tablet', 'syrup', 'drop', 'injection', 'bandage', 'plaster',
+            'test', 'scan', 'xray', 'doctor', 'nurse', 'fees',
+            # Financial & Other
+            'rent', 'bill', 'recharge', 'topup', 'data', 'plan', 'subscription', 'membership',
+            'donation', 'charity', 'gift', 'present', 'tax', 'fine', 'penalty', 'interest',
+            'emi', 'loan', 'debt', 'salary', 'wages', 'bonus', 'incentive'
         }
     
     def parse(self, text):
@@ -55,6 +98,134 @@ class ExpenseParser:
         """Parse a single expense from text with multiple pattern matching"""
         text = text.strip()
         
+        # ============== LOAN REPAYMENT PATTERNS (4 scenarios) ==============
+        # 1. BORROWED: I borrow from someone (money comes in, I owe them)
+        # 2. LENT: I lend to someone (money goes out, they owe me)
+        # 3. PAID: I pay back loan I borrowed (money goes out, my debt reduces)
+        # 4. RECEIVED: Someone pays back loan they borrowed from me (money comes in, their debt reduces)
+        
+        # ===== PAID PATTERNS (I'm repaying a loan I borrowed) =====
+        
+        # Pattern: "paid loan to person amount" - I'm paying back loan to person
+        # Example: "paid loan to hari 400" = I'm returning Rs.400 to Hari (I had borrowed from him)
+        paid_loan_to_pattern = r'^paid\s+(?:back\s+)?(?:the\s+)?loan\s+to\s+([a-zA-Z]+)\s+(\d+)$'
+        paid_loan_to_match = re.match(paid_loan_to_pattern, text, re.IGNORECASE)
+        if paid_loan_to_match:
+            person, amount = paid_loan_to_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out (I'm paying back)
+                    'item': 'loan repayment',
+                    'category': 'Loan',
+                    'remarks': f"Paid back loan to {person.title()}",
+                    'paid_by': person.title()
+                }
+        
+        # Pattern: "paid person money i took/borrowed from him/her amount"
+        # Example: "paid hari money i took from him 5000" = I'm returning Rs.5000 to Hari
+        paid_money_took_pattern = r'^paid\s+([a-zA-Z]+)\s+(?:the\s+)?(?:money|loan|amount)\s+(?:i|that\s+i)\s+(?:took|borrowed)\s+(?:from\s+(?:him|her|them))?\s*(\d+)$'
+        paid_money_took_match = re.match(paid_money_took_pattern, text, re.IGNORECASE)
+        if paid_money_took_match:
+            person, amount = paid_money_took_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out (I'm repaying)
+                    'item': 'loan repayment',
+                    'category': 'Loan',
+                    'remarks': f"Paid back money taken from {person.title()}",
+                    'paid_by': person.title()
+                }
+        
+        # Pattern: "repaid person amount" or "repaid amount to person"
+        # Example: "repaid hari 500" = I'm returning Rs.500 to Hari
+        repaid_pattern = r'^repaid\s+([a-zA-Z]+)\s+(\d+)$'
+        repaid_match = re.match(repaid_pattern, text, re.IGNORECASE)
+        if repaid_match:
+            person, amount = repaid_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out
+                    'item': 'loan repayment',
+                    'category': 'Loan',
+                    'remarks': f"Repaid loan to {person.title()}",
+                    'paid_by': person.title()
+                }
+        
+        # Pattern: "repaid amount to person"
+        repaid_to_pattern = r'^repaid\s+(\d+)\s+to\s+([a-zA-Z]+)$'
+        repaid_to_match = re.match(repaid_to_pattern, text, re.IGNORECASE)
+        if repaid_to_match:
+            amount, person = repaid_to_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out
+                    'item': 'loan repayment',
+                    'category': 'Loan',
+                    'remarks': f"Repaid loan to {person.title()}",
+                    'paid_by': person.title()
+                }
+        
+        # ===== RECEIVED PATTERNS (Person is paying back loan they borrowed from me) =====
+        
+        # Pattern: "paid to person his/her loan amount" - Person paid back their loan
+        # Example: "paid to hari his loan 500" = Hari returned Rs.500 he had borrowed from me
+        paid_to_his_loan_pattern = r'^paid\s+to\s+([a-zA-Z]+)\s+(?:his|her|their)\s+loan\s+(\d+)$'
+        paid_to_his_loan_match = re.match(paid_to_his_loan_pattern, text, re.IGNORECASE)
+        if paid_to_his_loan_match:
+            person, amount = paid_to_his_loan_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in (they're repaying me)
+                    'item': 'loan received back',
+                    'category': 'Loan',
+                    'remarks': f"{person.title()} paid back their loan",
+                    'paid_by': person.title()
+                }
+        
+        # Pattern: "person paid his/her loan amount" - Person returned loan
+        # Example: "hari paid his loan 400" = Hari returned Rs.400 he had borrowed from me
+        person_paid_his_loan_pattern = r'^([a-zA-Z]+)\s+paid\s+(?:back\s+)?(?:his|her|their)\s+loan\s+(\d+)$'
+        person_paid_his_loan_match = re.match(person_paid_his_loan_pattern, text, re.IGNORECASE)
+        if person_paid_his_loan_match:
+            person, amount = person_paid_his_loan_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': 'loan received back',
+                    'category': 'Loan',
+                    'remarks': f"{person.title()} paid back their loan",
+                    'paid_by': person.title()
+                }
+        
+        # Pattern: "received loan back from person amount"
+        # Example: "received loan back from hari 500" = Hari returned Rs.500
+        received_loan_back_pattern = r'^received\s+(?:the\s+)?loan\s+back\s+from\s+([a-zA-Z]+)\s+(\d+)$'
+        received_loan_back_match = re.match(received_loan_back_pattern, text, re.IGNORECASE)
+        if received_loan_back_match:
+            person, amount = received_loan_back_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': 'loan received back',
+                    'category': 'Loan',
+                    'remarks': f"Received loan back from {person.title()}",
+                    'paid_by': person.title()
+                }
+        
+        # Pattern: "got loan back from person amount"
+        got_loan_back_pattern = r'^got\s+(?:the\s+)?loan\s+back\s+from\s+([a-zA-Z]+)\s+(\d+)$'
+        got_loan_back_match = re.match(got_loan_back_pattern, text, re.IGNORECASE)
+        if got_loan_back_match:
+            person, amount = got_loan_back_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': 'loan received back',
+                    'category': 'Loan',
+                    'remarks': f"Got loan back from {person.title()}",
+                    'paid_by': person.title()
+                }
+        
         # ============== LOAN PATTERNS FIRST (before generic patterns) ==============
         
         # Pattern 1: "Person lent [me] amount" - Explicit Loan
@@ -62,52 +233,56 @@ class ExpenseParser:
         person_lent_match = re.match(person_lent_pattern, text, re.IGNORECASE)
         if person_lent_match:
             person, amount = person_lent_match.groups()
-            return {
-                'amount': -int(amount), # Negative = money coming in (I received)
-                'item': 'loan from',
-                'category': 'Loan',
-                'remarks': f"Loan from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount), # Negative = money coming in (I received)
+                    'item': 'loan from',
+                    'category': 'Loan',
+                    'remarks': f"Loan from {person.title()}",
+                    'paid_by': person.title()
+                }
 
         # Pattern 2: "Person gave/sent/send [me] amount" - Ambiguous
         person_gave_pattern = r'^([a-zA-Z]+)\s+(?:gave|sent|send)(?:\s+me)?\s+(\d+)$'
         person_gave_match = re.match(person_gave_pattern, text, re.IGNORECASE)
         if person_gave_match:
             person, amount = person_gave_match.groups()
-            return {
-                'amount': -int(amount), # Negative = money coming in
-                'item': 'received from',
-                'category': 'Other', # Ambiguous - let user decide
-                'remarks': f"Received from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount), # Negative = money coming in
+                    'item': 'received from',
+                    'category': 'Other', # Ambiguous - let user decide
+                    'remarks': f"Received from {person.title()}",
+                    'paid_by': person.title()
+                }
 
         # Pattern: "i gave/lent person amount" like "i gave sonu 500" - needs confirmation (LENT or PAID?)
         i_gave_pattern = r'^i\s+(?:gave|lent|sent)\s+([a-zA-Z]+)\s+(\d+)$'
         i_gave_match = re.match(i_gave_pattern, text, re.IGNORECASE)
         if i_gave_match:
             person, amount = i_gave_match.groups()
-            return {
-                'amount': int(amount),  # Will be corrected by user
-                'item': 'i gave',  # Hint for frontend
-                'category': 'Other',  # Triggers confirmation
-                'remarks': f"I gave {person.title()} Rs.{amount}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Will be corrected by user
+                    'item': 'i gave',  # Hint for frontend
+                    'category': 'Other',  # Triggers confirmation
+                    'remarks': f"I gave {person.title()} Rs.{amount}",
+                    'paid_by': person.title()
+                }
         
         # Pattern: "i borrowed/took amount from person" like "i borrowed 500 from sonu"
         i_borrowed_pattern = r'^i\s+(?:borrowed|took)\s+(\d+)\s+from\s+([a-zA-Z]+)$'
         i_borrowed_match = re.match(i_borrowed_pattern, text, re.IGNORECASE)
         if i_borrowed_match:
             amount, person = i_borrowed_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in (debt)
-                'item': 'borrowed from',
-                'category': 'Loan',
-                'remarks': f"Borrowed from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in (debt)
+                    'item': 'borrowed from',
+                    'category': 'Loan',
+                    'remarks': f"Borrowed from {person.title()}",
+                    'paid_by': person.title()
+                }
         
 
         
@@ -116,118 +291,218 @@ class ExpenseParser:
         person_borrowed_match = re.match(person_borrowed_pattern, text, re.IGNORECASE)
         if person_borrowed_match:
             person, amount = person_borrowed_match.groups()
-            return {
-                'amount': int(amount),  # Positive = money going out (you lent)
-                'item': 'lent to',
-                'category': 'Loan',
-                'remarks': f"Lent to {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out (you lent)
+                    'item': 'lent to',
+                    'category': 'Loan',
+                    'remarks': f"Lent to {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern: "person paid amount" like "hari paid 400" (they paid back)
         person_paid_pattern = r'^([a-zA-Z]+)\s+paid\s+(\d+)$'
         person_paid_match = re.match(person_paid_pattern, text, re.IGNORECASE)
         if person_paid_match:
             person, amount = person_paid_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in (repayment)
-                'item': 'received from',
-                'category': 'Loan',
-                'remarks': f"Paid back by {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in (repayment)
+                    'item': 'received from',
+                    'category': 'Loan',
+                    'remarks': f"Paid back by {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern: "amount received/got from person" like "100 received from rahul"
         amount_received_pattern = r'^(\d+)\s+(?:received|got|returned)\s+from\s+([a-zA-Z]+)'
         amount_received_match = re.match(amount_received_pattern, text, re.IGNORECASE)
         if amount_received_match:
             amount, person = amount_received_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in
-                'item': 'received from',
-                'category': 'Loan',
-                'remarks': f"Received from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': 'received from',
+                    'category': 'Loan',
+                    'remarks': f"Received from {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern: "got/received amount from person" like "got 400 from ram" (verb first)
         verb_received_pattern = r'^(?:got|received|returned)\s+(\d+)\s+from\s+([a-zA-Z]+)'
         verb_received_match = re.match(verb_received_pattern, text, re.IGNORECASE)
         if verb_received_match:
             amount, person = verb_received_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in
-                'item': 'received from',
-                'category': 'Loan',
-                'remarks': f"Received from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': 'received from',
+                    'category': 'Loan',
+                    'remarks': f"Received from {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern: "amount paid to person" like "500 paid to ram"
         amount_paid_pattern = r'^(\d+)\s+paid\s+to\s+([a-zA-Z]+)'
         amount_paid_match = re.match(amount_paid_pattern, text, re.IGNORECASE)
         if amount_paid_match:
             amount, person = amount_paid_match.groups()
-            return {
-                'amount': int(amount),  # Positive = money going out
-                'item': 'paid to',
-                'category': 'Loan',
-                'remarks': f"Paid to {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out
+                    'item': 'paid to',
+                    'category': 'Loan',
+                    'remarks': f"Paid to {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern: "amount borrowed/took from person" like "5000 borrowed from sonu"
         amount_borrowed_pattern = r'^(\d+)\s+(?:borrowed|took)\s+from\s+([a-zA-Z]+)'
         amount_borrowed_match = re.match(amount_borrowed_pattern, text, re.IGNORECASE)
         if amount_borrowed_match:
             amount, person = amount_borrowed_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in (debt)
-                'item': 'borrowed from',
-                'category': 'Loan',
-                'remarks': f"Borrowed from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in (debt)
+                    'item': 'borrowed from',
+                    'category': 'Loan',
+                    'remarks': f"Borrowed from {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern: "amount lent/gave to person" like "100 lent to rahul"
         amount_lent_pattern = r'^(\d+)\s+(?:lent|gave|lend|sent)\s+to\s+([a-zA-Z]+)'
         amount_lent_match = re.match(amount_lent_pattern, text, re.IGNORECASE)
         if amount_lent_match:
             amount, person = amount_lent_match.groups()
-            return {
-                'amount': int(amount),  # Positive = money going out
-                'item': 'lent to',
-                'category': 'Loan',
-                'remarks': f"Lent to {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out
+                    'item': 'lent to',
+                    'category': 'Loan',
+                    'remarks': f"Lent to {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # ============== AMBIGUOUS PATTERNS (need confirmation) ==============
+        
+        # Pattern: "got gift/money from person amount" - AMBIGUOUS, needs confirmation
+        # Could be a gift (income) or a loan (debt)
+        got_something_pattern = r'^(?:got|received)\s+(gift|money|cash|amount|fund|funds)\s+from\s+([a-zA-Z]+)\s+(\d+)$'
+        got_something_match = re.match(got_something_pattern, text, re.IGNORECASE)
+        if got_something_match:
+            what, person, amount = got_something_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': f'{what} from person',  # Hint for frontend
+                    'category': 'Other',  # Triggers confirmation popup
+                    'remarks': f"Received {what} from {person.title()}",
+                    'paid_by': person.title(),
+                    'needs_confirmation': True,
+                    'confirmation_options': [
+                        {'category': 'Gift Income', 'label': 'Gift (no repayment needed)', 'remarks': f'Gift from {person.title()}'},
+                        {'category': 'Loan', 'label': 'Loan (need to repay)', 'remarks': f'Loan received from {person.title()}'}
+                    ]
+                }
+        
+        # Pattern: "got gift/money amount from person" - alternate order
+        got_amount_pattern = r'^(?:got|received)\s+(gift|money|cash|amount|fund|funds)\s+(\d+)\s+from\s+([a-zA-Z]+)$'
+        got_amount_match = re.match(got_amount_pattern, text, re.IGNORECASE)
+        if got_amount_match:
+            what, amount, person = got_amount_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': f'{what} from person',  # Hint for frontend
+                    'category': 'Other',  # Triggers confirmation popup
+                    'remarks': f"Received {what} from {person.title()}",
+                    'paid_by': person.title(),
+                    'needs_confirmation': True,
+                    'confirmation_options': [
+                        {'category': 'Gift Income', 'label': 'Gift (no repayment needed)', 'remarks': f'Gift from {person.title()}'},
+                        {'category': 'Loan', 'label': 'Loan (need to repay)', 'remarks': f'Loan received from {person.title()}'}
+                    ]
+                }
         
         # Pattern: "amount from person" - ambiguous, could be received OR borrowed
         ambiguous_from_pattern = r'^(\d+)\s+from\s+([a-zA-Z]+)$'
         ambiguous_from_match = re.match(ambiguous_from_pattern, text, re.IGNORECASE)
         if ambiguous_from_match:
             amount, person = ambiguous_from_match.groups()
-            return {
-                'amount': int(amount),  # Will be corrected by user
-                'item': 'from person',  # Hint for frontend (money coming in)
-                'category': 'Other',  # Triggers confirmation
-                'remarks': f"Rs.{amount} from {person.title()}",
-                'paid_by': person.title()  # Important! Sets person for UI
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Will be corrected by user
+                    'item': 'from person',  # Hint for frontend (money coming in)
+                    'category': 'Other',  # Triggers confirmation
+                    'remarks': f"Rs.{amount} from {person.title()}",
+                    'paid_by': person.title()  # Important! Sets person for UI
+                }
         
         # Pattern: "amount to person" - ambiguous, could be lent OR paid
         ambiguous_to_pattern = r'^(\d+)\s+to\s+([a-zA-Z]+)$'
         ambiguous_to_match = re.match(ambiguous_to_pattern, text, re.IGNORECASE)
         if ambiguous_to_match:
             amount, person = ambiguous_to_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Will be corrected by user
+                    'item': 'to person',  # Hint for frontend (money going out)
+                    'category': 'Other',  # Triggers confirmation
+                    'remarks': f"Rs.{amount} to {person.title()}",
+                    'paid_by': person.title()  # Important! Sets person for UI
+                }
+        
+        # ============== GIFT EXPENSE PATTERNS ==============
+        
+        # Pattern: "got/bought gift for person amount" like "got gift for sonu 400"
+        # This is an EXPENSE (buying a gift for someone), NOT income
+        gift_for_pattern = r'^(?:got|bought|get|buy|purchased)\s+(?:a\s+)?gift\s+for\s+([a-zA-Z]+)\s+(\d+)$'
+        gift_for_match = re.match(gift_for_pattern, text, re.IGNORECASE)
+        if gift_for_match:
+            person, amount = gift_for_match.groups()
             return {
-                'amount': int(amount),  # Will be corrected by user
-                'item': 'to person',  # Hint for frontend (money going out)
-                'category': 'Other',  # Triggers confirmation
-                'remarks': f"Rs.{amount} to {person.title()}",
-                'paid_by': person.title()  # Important! Sets person for UI
+                'amount': int(amount),
+                'item': 'gift',
+                'category': 'Shopping',
+                'remarks': f"Gift for {person.title()}",
+                'paid_by': None  # NOT paid_by - this is an expense I'm making
+            }
+        
+        # Pattern: "gift for person amount" like "gift for sonu 400"
+        gift_for_pattern2 = r'^gift\s+for\s+([a-zA-Z]+)\s+(\d+)$'
+        gift_for_match2 = re.match(gift_for_pattern2, text, re.IGNORECASE)
+        if gift_for_match2:
+            person, amount = gift_for_match2.groups()
+            return {
+                'amount': int(amount),
+                'item': 'gift',
+                'category': 'Shopping',
+                'remarks': f"Gift for {person.title()}",
+                'paid_by': None  # NOT paid_by - this is an expense I'm making
+            }
+        
+        # ============== INSTITUTION LOAN PATTERNS (before generic) ==============
+        
+        # Pattern: "amount borrowed from bank/institution [for purpose]"
+        # Handles: "100000 borrowed from bank for home renovation"
+        institution_borrow_pattern = r'^(\d+)\s+(?:borrowed|took|loan)\s+from\s+(bank|finance|company|app|nabil|nic|global|ime|sanima|himalayan|prabhu|laxmi|siddhartha|sunrise|kumari|machhapuchhre|agricultural|ncb|citizens)(?:\s+(?:for|to)\s+(.+))?$'
+        institution_borrow_match = re.match(institution_borrow_pattern, text, re.IGNORECASE)
+        if institution_borrow_match:
+            amount = institution_borrow_match.group(1)
+            institution = institution_borrow_match.group(2)
+            purpose = institution_borrow_match.group(3)
+            
+            remark = f"Borrowed from {institution.title()}"
+            if purpose:
+                remark += f" for {purpose.title()}"
+            
+            return {
+                'amount': -int(amount),  # NEGATIVE = I owe money (debt)
+                'item': 'bank loan',
+                'category': 'Loan',
+                'remarks': remark,
+                'paid_by': institution.title()
             }
         
         # ============== GENERIC PATTERNS (fallback) ==============
@@ -243,7 +518,7 @@ class ExpenseParser:
                 'amount': int(amount),
                 'item': item.lower(),
                 'category': category,
-                'remarks': item.title(),
+                'remarks': self._generate_detailed_remark(item, category),
                 'paid_by': None
             }
         
@@ -254,13 +529,14 @@ class ExpenseParser:
         owes_match = re.search(owes_pattern, text, re.IGNORECASE)
         if owes_match:
             debtor, amount, creditor = owes_match.groups()
-            return {
-                'amount': int(amount),
-                'item': f'{debtor.lower()} owes {creditor.lower()}',
-                'category': 'Loan',
-                'remarks': f"{debtor.title()} owes {creditor.title()}",
-                'paid_by': debtor.title()
-            }
+            if self._is_likely_person(debtor) and self._is_likely_person(creditor):
+                return {
+                    'amount': int(amount),
+                    'item': f'{debtor.lower()} owes {creditor.lower()}',
+                    'category': 'Loan',
+                    'remarks': f"{debtor.title()} owes {creditor.title()}",
+                    'paid_by': debtor.title()
+                }
         
         # Pattern 0a: "got/received salary amount" like "got salary 100000" or "got salary today 50000"
         salary_pattern = r'^(?:got|received)\s+salary\s+(?:today\s+)?(\d+)$'
@@ -306,52 +582,56 @@ class ExpenseParser:
         repayment_match = re.match(repayment_pattern, text, re.IGNORECASE)
         if repayment_match:
             amount, person = repayment_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in
-                'item': 'received from',
-                'category': 'Loan',
-                'remarks': f"Received from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': 'received from',
+                    'category': 'Loan',
+                    'remarks': f"Received from {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 0d2: "amount received from person" like "100 received from rahul"
         amount_received_pattern = r'^(\d+)\s+(?:received|got|returned)\s+from\s+([a-zA-Z]+)'
         amount_received_match = re.match(amount_received_pattern, text, re.IGNORECASE)
         if amount_received_match:
             amount, person = amount_received_match.groups()
-            return {
-                'amount': -int(amount),  # Negative = money coming in
-                'item': 'received from',
-                'category': 'Loan',
-                'remarks': f"Received from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative = money coming in
+                    'item': 'received from',
+                    'category': 'Loan',
+                    'remarks': f"Received from {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 0d3: "paid amount to person" like "paid 500 to ram"
         paid_to_pattern = r'^paid\s+(\d+)\s+to\s+([a-zA-Z]+)'
         paid_to_match = re.match(paid_to_pattern, text, re.IGNORECASE)
         if paid_to_match:
             amount, person = paid_to_match.groups()
-            return {
-                'amount': int(amount),  # Positive = money going out
-                'item': 'paid to',
-                'category': 'Loan',
-                'remarks': f"Paid to {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out
+                    'item': 'paid to',
+                    'category': 'Loan',
+                    'remarks': f"Paid to {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 0d4: "amount paid to person" like "500 paid to ram"
         amount_paid_pattern = r'^(\d+)\s+paid\s+to\s+([a-zA-Z]+)'
         amount_paid_match = re.match(amount_paid_pattern, text, re.IGNORECASE)
         if amount_paid_match:
             amount, person = amount_paid_match.groups()
-            return {
-                'amount': int(amount),  # Positive = money going out
-                'item': 'paid to',
-                'category': 'Loan',
-                'remarks': f"Paid to {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),  # Positive = money going out
+                    'item': 'paid to',
+                    'category': 'Loan',
+                    'remarks': f"Paid to {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 0e: "took/borrowed/received [back] [loan] from person amount"
         # Handles: "recived back loan from hari 100000"
@@ -359,12 +639,55 @@ class ExpenseParser:
         borrow_match = re.match(borrow_pattern, text, re.IGNORECASE)
         if borrow_match:
             person, amount = borrow_match.groups()
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative for loan taken/repaid
+                    'item': 'loan transaction',
+                    'category': 'Loan',
+                    'remarks': f"Loan transaction with {person.title()}",
+                    'paid_by': person.title()
+                }
+        
+        # Pattern: "amount borrowed from bank/institution [for purpose]"
+        # Handles: "1 lakh borrowed from bank for home renovation", "100000 borrowed from bank"
+        # Institution names: bank, finance, company, app, etc.
+        institution_borrow_pattern = r'^(\d+)\s+(?:borrowed|took|loan)\s+from\s+(bank|finance|company|app|nabil|nic|global|ime|sanima|himalayan|prabhu|laxmi|siddhartha|sunrise|kumari|machhapuchhre|agricultural|ncb|citizens)(?:\s+(?:for|to)\s+(.+))?$'
+        institution_borrow_match = re.match(institution_borrow_pattern, text, re.IGNORECASE)
+        if institution_borrow_match:
+            amount = institution_borrow_match.group(1)
+            institution = institution_borrow_match.group(2)
+            purpose = institution_borrow_match.group(3)
+            
+            remark = f"Borrowed from {institution.title()}"
+            if purpose:
+                remark += f" for {purpose.title()}"
+            
             return {
-                'amount': -int(amount),  # Negative for loan taken/repaid
-                'item': 'loan transaction',
+                'amount': -int(amount),  # NEGATIVE = I owe money (debt)
+                'item': 'bank loan',
                 'category': 'Loan',
-                'remarks': f"Loan transaction with {person.title()}",
-                'paid_by': person.title()
+                'remarks': remark,
+                'paid_by': institution.title()
+            }
+        
+        # Pattern: "borrowed amount from bank [for purpose]" (verb first)
+        institution_borrow_pattern2 = r'^(?:borrowed|took)\s+(\d+)\s+from\s+(bank|finance|company|app|nabil|nic|global|ime|sanima|himalayan|prabhu|laxmi|siddhartha|sunrise|kumari|machhapuchhre|agricultural|ncb|citizens)(?:\s+(?:for|to)\s+(.+))?$'
+        institution_borrow_match2 = re.match(institution_borrow_pattern2, text, re.IGNORECASE)
+        if institution_borrow_match2:
+            amount = institution_borrow_match2.group(1)
+            institution = institution_borrow_match2.group(2)
+            purpose = institution_borrow_match2.group(3)
+            
+            remark = f"Borrowed from {institution.title()}"
+            if purpose:
+                remark += f" for {purpose.title()}"
+            
+            return {
+                'amount': -int(amount),  # NEGATIVE = I owe money (debt)
+                'item': 'bank loan',
+                'category': 'Loan',
+                'remarks': remark,
+                'paid_by': institution.title()
             }
 
         # Pattern 0f: "took/borrowed amount from person" like "borrowed 5000 from sonu"
@@ -372,65 +695,70 @@ class ExpenseParser:
         borrow_match_2 = re.match(borrow_pattern_2, text, re.IGNORECASE)
         if borrow_match_2:
             amount, person = borrow_match_2.groups()
-            return {
-                'amount': -int(amount),  # Negative for loan taken
-                'item': 'borrowed from',
-                'category': 'Loan',
-                'remarks': f"Borrowed from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative for loan taken
+                    'item': 'borrowed from',
+                    'category': 'Loan',
+                    'remarks': f"Borrowed from {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 0f2: "amount borrowed from person" like "5000 borrowed from sonu"
         amount_borrowed_pattern = r'^(\d+)\s+(?:borrowed|took)\s+from\s+([a-zA-Z]+)'
         amount_borrowed_match = re.match(amount_borrowed_pattern, text, re.IGNORECASE)
         if amount_borrowed_match:
             amount, person = amount_borrowed_match.groups()
-            return {
-                'amount': -int(amount),  # Negative for loan taken
-                'item': 'borrowed from',
-                'category': 'Loan',
-                'remarks': f"Borrowed from {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': -int(amount),  # Negative for loan taken
+                    'item': 'borrowed from',
+                    'category': 'Loan',
+                    'remarks': f"Borrowed from {person.title()}",
+                    'paid_by': person.title()
+                }
 
         # Pattern 1a: "lent/gave amount to person" like "lent 100 to Rahul"
         lent_to_pattern = r'^(?:lent|gave|lend|sent)\s+(\d+)\s+to\s+([a-zA-Z]+)'
         lent_to_match = re.match(lent_to_pattern, text, re.IGNORECASE)
         if lent_to_match:
             amount, person = lent_to_match.groups()
-            return {
-                'amount': int(amount),
-                'item': 'loan given',
-                'category': 'Loan',
-                'remarks': f"Lent to {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),
+                    'item': 'loan given',
+                    'category': 'Loan',
+                    'remarks': f"Lent to {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 1b: "gave person amount for duration" like "gave sonu 400 for a week"
         gave_duration_pattern = r'^(?:gave|lend|lent)\s+([a-zA-Z]+)\s+(\d+)\s+for\s+(.+)$'
         gave_duration_match = re.match(gave_duration_pattern, text, re.IGNORECASE)
         if gave_duration_match:
             person, amount, duration = gave_duration_match.groups()
-            return {
-                'amount': int(amount),
-                'item': 'loan given',
-                'category': 'Loan',
-                'remarks': f"Lent to {person.title()} for {duration}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),
+                    'item': 'loan given',
+                    'category': 'Loan',
+                    'remarks': f"Lent to {person.title()} for {duration}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 1b: "gave person amount loan" like "gave gaurav 300 loan"
         loan_pattern = r'^(?:gave|lend|lent)\s+([a-zA-Z]+)\s+(\d+)\s*(?:loan|rin|udhar)?$'
         loan_match = re.match(loan_pattern, text, re.IGNORECASE)
         if loan_match:
             person, amount = loan_match.groups()
-            return {
-                'amount': int(amount),
-                'item': 'loan',
-                'category': 'Loan',
-                'remarks': f"Loan given to {person.title()}",
-                'paid_by': person.title()
-            }
+            if self._is_likely_person(person):
+                return {
+                    'amount': int(amount),
+                    'item': 'loan',
+                    'category': 'Loan',
+                    'remarks': f"Loan given to {person.title()}",
+                    'paid_by': person.title()
+                }
         
         # Pattern 1c: "loan paid amount" like "loan paid 400"
         loan_paid_pattern = r'^loan\s+paid\s+(\d+)$'
@@ -446,26 +774,34 @@ class ExpenseParser:
             }
         
         # Pattern 2: "item person amount" like "rent sonu 20000" or "tea gaurav 100"
-        # Only match if it's clearly a person name (common names or single word after single-word item)
-        common_item_words = ['case', 'cover', 'stand', 'holder', 'bag', 'box', 'pack', 'set', 'kit']
-        food_words = ['lunch', 'dinner', 'breakfast', 'snack', 'meal', 'tea', 'coffee', 'food']
         pattern1 = r'^([a-zA-Z\s]+?)\s+([a-zA-Z]+)\s+(\d+)$'
         match1 = re.match(pattern1, text)
         if match1:
             item, potential_person, amount = match1.groups()
-            # Skip if potential_person is likely part of item description
-            if potential_person.lower() not in food_words and potential_person.lower() not in common_item_words:
-                # Only treat as person if item is single word (like "rent", "tea")
-                if len(item.split()) == 1:
-                    item = self._clean_item_name(item)
-                    category = self._categorize(item)
-                    return {
-                        'amount': int(amount),
-                        'item': item.lower(),
-                        'category': category,
-                        'remarks': f"{item.title()} - Paid by {potential_person.title()}",
-                        'paid_by': potential_person.title()
-                    }
+            
+            # Use improved person detection
+            if self._is_likely_person(potential_person, context_word=item.strip().split()[-1] if item.strip() else None):
+                item = self._clean_item_name(item)
+                category = self._categorize(item)
+                return {
+                    'amount': int(amount),
+                    'item': item.lower(),
+                    'category': category,
+                    'remarks': f"{item.title()} - Paid by {potential_person.title()}",
+                    'paid_by': potential_person.title()
+                }
+            else:
+                # If not a person, the whole thing is the item
+                full_item = f"{item} {potential_person}"
+                item = self._clean_item_name(full_item)
+                category = self._categorize(item)
+                return {
+                    'amount': int(amount),
+                    'item': item.lower(),
+                    'category': category,
+                    'remarks': self._generate_detailed_remark(item, category),
+                    'paid_by': None
+                }
         
         # Pattern 3: "item for/on context amount" like "samosa for lunch 80"
         pattern2a = r'^([a-zA-Z\s]+?)\s+(?:for|on)\s+([a-zA-Z\s]+?)\s+(\d+)$'
@@ -479,7 +815,7 @@ class ExpenseParser:
                 'amount': int(amount),
                 'item': item.lower(),
                 'category': category,
-                'remarks': item.title(),
+                'remarks': self._generate_detailed_remark(item, category),
                 'paid_by': None
             }
         
@@ -494,7 +830,7 @@ class ExpenseParser:
                 'amount': int(amount),
                 'item': item.lower(),
                 'category': category,
-                'remarks': item.title(),
+                'remarks': self._generate_detailed_remark(item, category),
                 'paid_by': None
             }
         
@@ -581,7 +917,7 @@ class ExpenseParser:
                 'amount': int(amount),
                 'item': item.lower(),
                 'category': category,
-                'remarks': item.title()
+                'remarks': self._generate_detailed_remark(item, category)
             }
         
         # Pattern 6c: "item of amount" like "Purchased Phone of 500"
@@ -595,7 +931,7 @@ class ExpenseParser:
                 'amount': int(amount),
                 'item': item.lower(),
                 'category': category,
-                'remarks': item.title()
+                'remarks': self._generate_detailed_remark(item, category)
             }
         
         # Pattern 7: "item amount" like "grocery 300" or "biryani 500"
@@ -619,7 +955,7 @@ class ExpenseParser:
                 'amount': int(amount),
                 'item': item.lower(),
                 'category': category,
-                'remarks': item.title(),
+                'remarks': self._generate_detailed_remark(item, category),
                 'paid_by': None
             }
         
@@ -636,7 +972,7 @@ class ExpenseParser:
                     'amount': amount,
                     'item': item.lower(),
                     'category': category,
-                    'remarks': item.title(),
+                    'remarks': self._generate_detailed_remark(item, category),
                     'paid_by': None
                 }
         
@@ -655,14 +991,108 @@ class ExpenseParser:
                     'amount': amount,
                     'item': description.lower(),
                     'category': category,
-                    'remarks': description.title()
+                    'remarks': self._generate_detailed_remark(description, category)
                 }
         
         return None
     
+    def _is_likely_person(self, word, context_word=None):
+        """Check if a word is likely a person's name using smart heuristics"""
+        word_lower = word.lower()
+        
+        # 1. Too short to be a name
+        if len(word) < 3:
+            return False
+        
+        # 2. If it's a known category keyword, it's not a person
+        if word_lower in self.all_keywords:
+            return False
+        
+        # 3. If in our explicit non-person list, it's not a person
+        if word_lower in self.non_person_words:
+            return False
+        
+        # 4. Check category lists
+        for keywords in self.categories.values():
+            if word_lower in keywords:
+                return False
+        
+        # 5. SMART HEURISTIC: If context word (the previous word) is a known category item,
+        # then this word is likely part of a compound item, not a person
+        if context_word:
+            context_lower = context_word.lower()
+            # Check if context is a known item category word
+            for keywords in self.categories.values():
+                if context_lower in keywords:
+                    # The previous word is a known item, so this word might be a descriptor
+                    # e.g., "water jar" - water is known, jar is likely part of the item
+                    return False
+            # Check if context is in all_keywords
+            if context_lower in self.all_keywords:
+                return False
+        
+        # 6. SMART HEURISTIC: Common object/container/descriptor patterns 
+        # These are so common they should never be mistaken for names
+        common_objects = {
+            # Containers
+            'jar', 'box', 'bag', 'pack', 'packet', 'bottle', 'can', 'tin', 'case', 'tray',
+            'plate', 'bowl', 'cup', 'glass', 'mug', 'pot', 'pan', 'container', 'carton',
+            # Sizes/quantities  
+            'small', 'medium', 'large', 'big', 'mini', 'extra', 'double', 'triple',
+            'half', 'full', 'empty', 'single', 'pair', 'set', 'dozen', 'kilo', 'litre',
+            # Colors
+            'red', 'blue', 'green', 'yellow', 'black', 'white', 'pink', 'brown', 'grey', 'gray', 'orange', 'purple',
+            # Common descriptors
+            'new', 'old', 'fresh', 'hot', 'cold', 'dry', 'wet', 'raw', 'cooked', 'fried', 'boiled',
+            'sweet', 'spicy', 'sour', 'salty', 'plain', 'mixed', 'special', 'regular', 'normal',
+            # Common things
+            'bill', 'card', 'ticket', 'pass', 'fee', 'charge', 'cost', 'price', 'rate',
+            'service', 'repair', 'work', 'job', 'trip', 'ride', 'fare', 'wash', 'clean',
+            # More items
+            'cover', 'sheet', 'roll', 'tube', 'stick', 'piece', 'slice', 'unit', 'item'
+        }
+        if word_lower in common_objects:
+            return False
+        
+        # 7. If word contains numbers, it's not a person
+        if any(c.isdigit() for c in word):
+            return False
+        
+        # 8. Very long words (>10 chars) are rarely names in casual input
+        if len(word) > 10:
+            return False
+        
+        # Default: assume it could be a person
+        return True
+
+    def _generate_detailed_remark(self, item, category):
+        """Generate a more professional remark based on category"""
+        item_title = item.title()
+        item_lower = item.lower()
+        cat_lower = category.lower()
+        
+        if cat_lower == 'food':
+            return f"Food: {item_title}" if 'food' in item_lower else f"Spent on {item_title}"
+        elif cat_lower == 'shopping':
+            return f"Purchased {item_title}"
+        elif cat_lower == 'transport':
+            return f"Travelled by {item_title}" if any(w in item_lower for w in ['taxi', 'bus', 'uber']) else f"Spent on {item_title}"
+        elif cat_lower == 'groceries':
+            return f"Grocery: {item_title}"
+        elif cat_lower == 'utilities':
+            return f"Paid {item_title}" if 'bill' in item_lower else f"Paid {item_title} Bill"
+        elif cat_lower == 'entertainment':
+            return f"Entertainment: {item_title}"
+        elif cat_lower == 'education':
+            return f"Education: {item_title}"
+        
+        return item_title
+
     def _clean_item_name(self, item):
         """Clean and normalize item names"""
         item = item.strip()
+        # Strip common verbs/articles from start
+        item = re.sub(r'^(had|ate|took|got|bought|buy|ordered|spent|paid|for|on)\s+', '', item, flags=re.IGNORECASE)
         item = re.sub(r'\b(the|a|an)\b', '', item, flags=re.IGNORECASE)
         item = re.sub(r'\s+', ' ', item).strip()
         
@@ -756,7 +1186,15 @@ class ExpenseParser:
         reply_parts = []
         for expense in expenses:
             amount = expense['amount']
-            if amount < 0:  # Income
+            needs_confirmation = expense.get('needs_confirmation', False)
+            
+            # Handle confirmation cases
+            if needs_confirmation:
+                options = expense.get('confirmation_options', [])
+                person = expense.get('paid_by', 'someone')
+                options_text = " or ".join([opt.get('label', opt.get('category', '')) for opt in options])
+                reply_parts.append(f"CONFIRM: Rs.{abs(amount)} from {person} - Is this a {options_text}?")
+            elif amount < 0:  # Income
                 reply_parts.append(f"SUCCESS: Added Rs.{abs(amount)} -> {expense['category']} ({expense['remarks']})")
             else:  # Expense
                 reply_parts.append(f"SUCCESS: Added Rs.{amount} -> {expense['category']} ({expense['remarks']})")
@@ -788,23 +1226,44 @@ class NLPService:
         if gemini_api_key and gemini_api_key.strip():
             try:
                 genai.configure(api_key=gemini_api_key)
-                self.model = genai.GenerativeModel('gemini-2.0-flash')
+                # gemini-2.5-flash found to be more stable on free tier than 2.0-flash
+                self.model = genai.GenerativeModel('gemini-2.5-flash')
                 self.gemini_available = True
-                print("SUCCESS: Gemini API configured")
+                print("SUCCESS: Gemini API configured (gemini-2.5-flash)")
             except Exception as e:
                 print(f"ERROR: Gemini API setup failed: {e}")
     
     def get_gemini_response(self, prompt: str) -> Optional[str]:
-        """Get response from Gemini with error handling"""
+        """Get response from Gemini with error handling and retries"""
         if not self.model or not self.gemini_available:
             return None
         
-        try:
-            response = self.model.generate_content(prompt)
-            if response and response.text:
-                return response.text.strip()
-        except Exception as e:
-            print(f"Gemini API error: {e}")
+        # Retry configuration
+        max_retries = 3
+        base_delay = 2
+        
+        import time
+        
+        for attempt in range(max_retries + 1):
+            try:
+                response = self.model.generate_content(prompt)
+                if response and response.text:
+                    return response.text.strip()
+            except Exception as e:
+                error_str = str(e).lower()
+                # Check for rate limit errors (429 or quota exceeded)
+                if '429' in error_str or 'quota' in error_str:
+                    if attempt < max_retries:
+                        delay = base_delay * (2 ** attempt) # Exponential backoff: 2, 4, 8 sent
+                        print(f"Gemini Rate Limit (429). Retrying in {delay}s... (Attempt {attempt+1}/{max_retries})")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        print(f"Gemini Rate Limit Exceeded after {max_retries} retries.")
+                else:
+                    print(f"Gemini API error: {e}")
+                    # Non-retryable error
+                    break
         
         return None
     
@@ -813,52 +1272,60 @@ class NLPService:
         try:
             prompt = f"""
 You are an intelligent personal finance assistant. Parse the following text into structured transaction data.
-Your goal is to "understand" the intent behind the transaction, not just match keywords.
+Your goal is to "understand" the intent behind the transaction and categorize it accurately.
 
 Text to Parse: "{text}"
 
 LOGIC & REASONING RULES:
-1. **Loans vs Income**:
-   - If I "took", "borrowed", "got", "received" money FROM A PERSON, it is a **LOAN (Debt)**. The amount must be **NEGATIVE**.
-   - If I "took", "borrowed" money from a BANK/APP, it is also a **LOAN**.
-   - "Salary", "Bonus", "Refund" are **INCOME** (Negative amount), but NOT loans.
-   - If specific words like "loan", "lend", "borrow" are missing, but the context implies it (e.g., "took 5k from Ravi"), treat it as a LOAN.
+1. **GIFT FOR vs GIFT FROM (IMPORTANT)**:
+   - "gift FOR [person]", "bought gift for [person]" = **EXPENSE** (Shopping). I'm spending money to buy a gift.
+     - Remark: "Gift for [Person]". DO NOT set paid_by.
+   - "gift FROM [person]", "got gift from [person]" = **AMBIGUOUS** (needs confirmation).
+     - Set "needs_confirmation": true with options for Gift Income or Loan.
 
-2. **Loans vs Expenses**:
-   - If I "gave", "lend", "sent", "paid" money TO A PERSON (without buying an item), it is a **LOAN GIVEN**. The amount is **POSITIVE**.
-   - If I "paid" a person for an item (e.g. "Paid Ravi for Momos"), it is an **EXPENSE** (Food).
+2. **PAID_BY RULES (CRITICAL)**:
+   - Set "paid_by" ONLY when text EXPLICITLY says "paid by [person]" or in loan transactions.
+   - For regular expenses like "gift for sonu", "food for party", etc. - DO NOT set paid_by.
+   - "paid_by": null for most personal expenses.
 
-3. **Categories**:
-   - Use standard categories: Food, Transport, Groceries, Shopping, Utilities, Entertainment, Rent, Loan, Income, Medical, Education, Travel.
-   - If unsure, use "Other".
+3. **AMBIGUOUS CASES - ASK FOR CONFIRMATION**:
+   - If text contains "got gift", "received gift", "got money", "received money" FROM A PERSON, this is AMBIGUOUS.
+   - Set "needs_confirmation": true and provide "confirmation_options" array.
 
-4. **Numbers & Units (IMPORTANT)**:
-   - Convert units to full numbers:
-   - "k" = 1,000 (e.g., "5k" -> 5000)
-   - "Lakh", "Lac", "L" = 100,000 (e.g., "1.5 lakh" -> 150000)
-   - "Crore", "Cr" = 10,000,000
+4. **Clear Loans (NO AMBIGUITY)**:
+   - "borrowed", "took loan" FROM A PERSON = **LOAN (Debt)**. Amount is **NEGATIVE**.
+   - "lent", "gave loan" TO A PERSON = **LOAN GIVEN**. Amount is **POSITIVE**.
 
-5. **Formatting**:
-   - "paid_by": For expenses, who paid? For loans, who is the other person?
-   - "remarks": Generate a short, clear summary.
+5. **Clear Income (NO AMBIGUITY)**:
+   - "Salary", "Bonus", "Refund", "Incentive" = **INCOME** (Negative amount).
 
-EXAMPLES:
-- \"lent 100 to rahul\" -> {{"amount": 100, "item": "loan given", "category": "Loan", "remarks": "Lent to Rahul", "paid_by": "Rahul"}}
-- \"borrowed 5000 from sonu\" -> {{"amount": -5000, "item": "loan taken", "category": "Loan", "remarks": "Borrowed from Sonu", "paid_by": "Sonu"}}
-- \"received 1000 from hari\" -> {{"amount": -1000, "item": "received payment", "category": "Loan", "remarks": "Received from Hari", "paid_by": "Hari"}}
-- \"paid 500 to ram\" -> {{"amount": 500, "item": "paid", "category": "Loan", "remarks": "Paid to Ram", "paid_by": "Ram"}}
-- \"took 50000 from ard\" -> {{"amount": -50000, "item": "loan taken", "category": "Loan", "remarks": "Loan taken from Ard", "paid_by": "Ard"}}
-- \"gave rahul 2000\" -> {{"amount": 2000, "item": "loan given", "category": "Loan", "remarks": "Loan given to Rahul", "paid_by": "Rahul"}}
-- \"paid sonu 500 for lunch\" -> {{"amount": 500, "item": "lunch", "category": "Food", "remarks": "Lunch (Paid by Sonu)", "paid_by": "Sonu"}}
-- \"salary received 100000\" -> {{"amount": -100000, "item": "salary", "category": "Income", "remarks": "Salary Received", "paid_by": null}}
+6. **Categories (DYNAMIC)**:
+   - Use specific categories: "Shopping" (for gifts), "Food", "Utilities", etc.
+   - **Do not limit yourself to a fixed list. Create a category if it fits better.**
+
+7. **Numbers & Units**:
+   - "k" = 1,000, "Lakh"/"L" = 100,000, "Cr" = 10,000,000.
+
+8. **Formatting**:
+   - "paid_by": Set to null for personal expenses. Only set for explicit "paid by" or loan transactions.
+   - "remarks": Generate a short, clear summary e.g. "Gift for Sonu", "Lunch expense".
 
 Return ONLY valid JSON structure:
+Example 1 - Regular expense (gift FOR someone):
 {{
   "expenses": [
-    {{"amount": -50000, "item": "loan taken", "category": "Loan", "remarks": "Loan taken from Ard", "paid_by": "Ard"}}
+    {{"amount": 400, "item": "gift", "category": "Shopping", "remarks": "Gift for Sonu", "paid_by": null}}
+  ]
+}}
+
+Example 2 - Ambiguous case (gift FROM someone):
+{{
+  "expenses": [
+    {{"amount": -4000, "item": "gift from person", "category": "Other", "remarks": "Received gift from Sonu", "paid_by": "Sonu", "needs_confirmation": true, "confirmation_options": [{{"category": "Gift Income", "label": "Gift (no repayment needed)", "remarks": "Gift from Sonu"}}, {{"category": "Loan", "label": "Loan (need to repay)", "remarks": "Loan received from Sonu"}}]}}
   ]
 }}
 """
+
             
             response = self.get_gemini_response(prompt)
             if response:
@@ -877,10 +1344,30 @@ Return ONLY valid JSON structure:
                     
                     # Validate and fix structure
                     if 'expenses' in parsed_data:
-                        if 'reply' not in parsed_data:
-                            count = len(parsed_data['expenses'])
-                            total = sum(exp.get('amount', 0) for exp in parsed_data['expenses'])
-                            parsed_data['reply'] = f"SUCCESS: Added {count} transactions (AI)"
+                        # Generate structured reply like regex parser
+                        reply_parts = []
+                        for exp in parsed_data['expenses']:
+                            amount = exp.get('amount', 0)
+                            category = exp.get('category', 'Other')
+                            remarks = exp.get('remarks', '')
+                            needs_confirmation = exp.get('needs_confirmation', False)
+                            
+                            # Ensure category is Title Case
+                            category = category.title()
+                            exp['category'] = category
+                            
+                            # Handle confirmation cases
+                            if needs_confirmation:
+                                options = exp.get('confirmation_options', [])
+                                person = exp.get('paid_by', 'someone')
+                                options_text = " or ".join([opt.get('label', opt.get('category', '')) for opt in options])
+                                reply_parts.append(f"CONFIRM: Rs.{abs(amount)} from {person} - Is this a {options_text}?")
+                            elif amount < 0:
+                                reply_parts.append(f"SUCCESS: Added Rs.{abs(amount)} -> {category} ({remarks})")
+                            else:
+                                reply_parts.append(f"SUCCESS: Added Rs.{amount} -> {category} ({remarks})")
+                                
+                        parsed_data['reply'] = '\n'.join(reply_parts)
                         return parsed_data
             
             return None
@@ -930,27 +1417,49 @@ Return ONLY valid JSON structure:
             text = self._preprocess_text(text)
             print(f"[PARSE] Pre-processed: {text}")
             
-            # Try AI-enhanced parsing first if Gemini is available
+            # OPTIMIZATION: Try fast regex-based parser FIRST
+            print(f"[PARSE] Using fast rule-based parser...")
+            expenses, reply = self.parser.parse(text)
+            
+            # If regex parser succeeded with valid results, return immediately (FAST PATH)
+            if expenses:
+                # Check if any expense needs confirmation - if so, return it for user to choose
+                needs_ai = False
+                for exp in expenses:
+                    if exp.get('needs_confirmation'):
+                        # Has confirmation options, return directly for user choice
+                        print(f"[PARSE] Regex found ambiguous case, returning for confirmation")
+                        return {"expenses": expenses, "reply": reply}
+                    # Only use AI if category is 'Other' with no confirmation (truly unknown)
+                    if exp.get('category', '').lower() == 'other' and not exp.get('needs_confirmation'):
+                        needs_ai = True
+                
+                # If all expenses are well-categorized, return fast
+                if not needs_ai:
+                    print(f"[PARSE] Fast regex parsed {len(expenses)} expenses successfully")
+                    return {"expenses": expenses, "reply": reply}
+            
+            # SLOW PATH: Only use AI for complex/unknown cases
             if self.gemini_available:
-                print(f"[PARSE] Trying AI parsing...")
+                print(f"[PARSE] Trying AI for complex case...")
                 ai_result = await self._ai_enhanced_parse(text)
                 if ai_result and ai_result.get('expenses'):
                     print(f"[PARSE] AI successfully parsed {len(ai_result['expenses'])} expenses")
                     return ai_result
                 else:
-                    print(f"[PARSE] AI parsing failed, falling back to rule-based")
+                    print(f"[PARSE] AI parsing failed")
             
-            # Fallback to rule-based parser
-            print(f"[PARSE] Using rule-based parser")
-            expenses, reply = self.parser.parse(text)
+            # Last resort: Return regex result even if category is 'Other'
+            if expenses:
+                print(f"[PARSE] Returning regex result as fallback")
+                return {"expenses": expenses, "reply": reply}
             
-            # If rule-based fails, try simple extraction
-            if not expenses:
-                print(f"[PARSE] Rule-based failed, trying simple extraction")
-                simple_expense = self._simple_extract(text)
-                if simple_expense:
-                    expenses = [simple_expense]
-                    reply = f"SUCCESS: Added Rs.{simple_expense['amount']} -> {simple_expense['category']} ({simple_expense['remarks']})"
+            # Final fallback: simple extraction
+            print(f"[PARSE] Trying simple extraction...")
+            simple_expense = self._simple_extract(text)
+            if simple_expense:
+                expenses = [simple_expense]
+                reply = f"SUCCESS: Added Rs.{simple_expense['amount']} -> {simple_expense['category']} ({simple_expense['remarks']})"
             
             return {
                 "expenses": expenses,
@@ -984,7 +1493,7 @@ Return ONLY valid JSON structure:
                     'amount': amount,
                     'item': item.lower(),
                     'category': category,
-                    'remarks': item.title(),
+                    'remarks': self.parser._generate_detailed_remark(item, category),
                     'paid_by': None
                 }
         except Exception as e:
@@ -1033,7 +1542,7 @@ Return ONLY valid JSON structure:
                     'amount': amount,
                     'item': item.lower(),
                     'category': category.title(),
-                    'remarks': item.title(),
+                    'remarks': self.parser._generate_detailed_remark(item, category),
                     'paid_by': None
                 })
                 

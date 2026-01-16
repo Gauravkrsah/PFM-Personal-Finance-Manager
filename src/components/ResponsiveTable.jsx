@@ -472,7 +472,7 @@ const ResponsiveTable = forwardRef(({ expenses, onExpenseUpdate, currentGroup, u
                       <div className="text-xs font-medium">{expense.item || '-'}</div>
                     </td>
                     <td className="p-2">
-                      <span className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                      <span className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded whitespace-nowrap">
                         {expense.category}
                       </span>
                     </td>
